@@ -1,10 +1,17 @@
-node_modules/
-dist/
+# Compilación
 build/
-.env
-.env.*
+*.o
+*.obj
+*.exe
+*.pdb
+*.ilk
+
+# Editores / sistema
 .vscode/
 .idea/
-*.log
 .DS_Store
 Thumbs.db
+
+# Copias de seguridad de datos (se conserva la carpeta)
+data/backup/*
+!data/backup/.gitkeep
