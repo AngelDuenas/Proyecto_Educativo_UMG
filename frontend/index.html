@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inicio | Pizarrón</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.18"></script>
+  <script src="js/tema.js"></script>
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body data-pagina="inicio" data-raiz="">
+  <div class="min-h-screen md:grid md:grid-cols-[248px_1fr]">
+    <aside class="menu" id="menu"></aside>
+
+    <main class="contenido min-w-0 px-4 pt-8 pb-12 md:px-10">
+      <section class="pizarron" aria-labelledby="titulo-inicio">
+        <h1 id="titulo-inicio">Sistema de gestión escolar</h1>
+        <p class="mt-1.5 text-celeste" id="fecha-hoy"></p>
+        <div class="mt-4 grid max-w-[60ch] gap-1.5 text-lg" id="resumen">
+          <p>Leyendo los datos del servidor…</p>
+        </div>
+      </section>
+
+      <h2 class="mt-7 mb-3">Gestión</h2>
+      <div class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4">
+        <a class="modulo" href="vistas/vista-estudiantes.html">
+          <strong>Estudiantes</strong>
+          <span>Registra, busca, edita y ordena a los estudiantes inscritos.</span>
+        </a>
+        <a class="modulo" href="vistas/vista-docentes-cursos.html">
+          <strong>Docentes y cursos</strong>
+          <span>Da de alta docentes y cursos, y asigna quién imparte cada curso.</span>
+        </a>
+      </div>
+
+      <h2 class="mt-7 mb-3">Rendimiento</h2>
+      <div class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4">
+        <a class="modulo" href="vistas/vista-calificaciones.html">
+          <strong>Calificaciones</strong>
+          <span>Matriz de notas por estudiante y curso, con promedios y estadísticas.</span>
+        </a>
+        <a class="modulo" href="vistas/vista-asistencia.html">
+          <strong>Asistencia</strong>
+          <span>Marca la asistencia de lunes a viernes y revisa los porcentajes.</span>
+        </a>
+        <a class="modulo" href="vistas/vista-reportes.html">
+          <strong>Reportes</strong>
+          <span>Rankings por promedio y asistencia, y cursos relacionados.</span>
+        </a>
+      </div>
+
+      <h2 class="mt-7 mb-3">Plan de estudios</h2>
+      <div class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4">
+        <a class="modulo" href="vistas/vista-arbol.html">
+          <strong>Estructura académica</strong>
+          <span>Árbol de universidad, facultad, carrera, semestres y cursos.</span>
+        </a>
+        <a class="modulo" href="vistas/vista-grafo.html">
+          <strong>Prerrequisitos</strong>
+          <span>Grafo de cursos con matriz de adyacencia y recorridos BFS y DFS.</span>
+        </a>
+      </div>
+    </main>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    document.getElementById("fecha-hoy").textContent = new Date().toLocaleDateString("es-GT", {
+      weekday: "long", day: "numeric", month: "long", year: "numeric",
+    });
+
+    async function cargarResumen() {
+      const [est, cur, doc, asis, stats] = await Promise.allSettled([
+        api("/estudiantes"), api("/cursos"), api("/docentes"), api("/asistencia"), api("/estadisticas"),
+      ]);
+      const valor = (r) => (r.status === "fulfilled" ? r.value : null);
+      const lineas = [];
+
+      if (valor(est)) lineas.push(`<b>${valor(est).length}</b> estudiantes inscritos`);
+      if (valor(cur) && valor(doc)) lineas.push(`<b>${valor(cur).length}</b> cursos impartidos por <b>${valor(doc).length}</b> docentes`);
+      if (valor(stats) && valor(stats).promedioGeneral !== null)
+        lineas.push(`Promedio general de notas: <b>${formatear(valor(stats).promedioGeneral)}</b>`);
+      if (valor(asis) && valor(asis).porDia.length) {
+        const prom = valor(asis).porDia.reduce((a, b) => a + b, 0) / valor(asis).porDia.length;
+        lineas.push(`Asistencia de la semana: <b>${formatear(prom, 0)} %</b>`);
+      }
+
+      document.getElementById("resumen").innerHTML = lineas.length
+        ? lineas.map((l) => `<p>${l}</p>`).join("")
+        : "<p>No se pudo leer ningún módulo. Revisa que el servidor C++ esté corriendo.</p>";
+    }
+    cargarResumen();
+  </script>
+</body>
+</html>
