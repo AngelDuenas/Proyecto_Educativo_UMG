@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Inicio | Pizarrón</title>
+  <title>Inicio | CLARD Academy</title>
+  <link rel="icon" href="img/icono.jpg">
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.18"></script>
   <script src="js/tema.js"></script>
   <link rel="stylesheet" href="css/estilos.css">
@@ -14,14 +15,15 @@
 
     <main class="contenido min-w-0 px-4 pt-8 pb-12 md:px-10">
       <section class="pizarron" aria-labelledby="titulo-inicio">
-        <h1 id="titulo-inicio">Sistema de gestión escolar</h1>
-        <p class="mt-1.5 text-celeste" id="fecha-hoy"></p>
-        <div class="mt-4 grid max-w-[60ch] gap-1.5 text-lg" id="resumen">
+        <p class="lema">Aprende · Crece · Avanza</p>
+        <h1 id="titulo-inicio" class="mt-2">Bienvenido a CLARD Academy</h1>
+        <p class="mt-1.5 text-celeste first-letter:uppercase" id="fecha-hoy"></p>
+        <div class="mt-6 grid max-w-[60ch] gap-2 text-lg text-white/90" id="resumen">
           <p>Leyendo los datos del servidor…</p>
         </div>
       </section>
 
-      <h2 class="mt-7 mb-3">Gestión</h2>
+      <h2 class="mt-9 mb-4">Gestión</h2>
       <div class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4">
         <a class="modulo" href="vistas/vista-estudiantes.html">
           <strong>Estudiantes</strong>
@@ -33,7 +35,7 @@
         </a>
       </div>
 
-      <h2 class="mt-7 mb-3">Rendimiento</h2>
+      <h2 class="mt-9 mb-4">Rendimiento</h2>
       <div class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4">
         <a class="modulo" href="vistas/vista-calificaciones.html">
           <strong>Calificaciones</strong>
@@ -49,7 +51,7 @@
         </a>
       </div>
 
-      <h2 class="mt-7 mb-3">Plan de estudios</h2>
+      <h2 class="mt-9 mb-4">Plan de estudios</h2>
       <div class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4">
         <a class="modulo" href="vistas/vista-arbol.html">
           <strong>Estructura académica</strong>
