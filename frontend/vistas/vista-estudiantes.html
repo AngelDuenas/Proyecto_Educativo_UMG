@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Estudiantes | Pizarrón</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.18"></script>
+  <script src="../js/tema.js"></script>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body data-pagina="estudiantes" data-raiz="../">
+  <div class="min-h-screen md:grid md:grid-cols-[248px_1fr]">
+    <aside class="menu" id="menu"></aside>
+
+    <main class="contenido min-w-0 px-4 pt-8 pb-12 md:px-10">
+      <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1>Estudiantes</h1>
+          <p class="mt-1.5 max-w-[62ch] text-tinta-suave">Registra, busca y edita a los estudiantes. La búsqueda y el orden los resuelve el servidor en C++.</p>
+        </div>
+        <button class="btn btn-primario" type="button" id="btn-nuevo">Registrar estudiante</button>
+      </header>
+
+      <section class="panel" aria-labelledby="titulo-lista">
+        <h2 id="titulo-lista" class="sr-only">Lista de estudiantes</h2>
+        <div class="mb-4 flex flex-wrap items-center gap-2.5">
+          <label class="sr-only" for="buscar">Buscar estudiante</label>
+          <input class="w-auto flex-[1_1_220px]" type="search" id="buscar" placeholder="Buscar por nombre o carnet">
+          <label class="sr-only" for="orden">Ordenar por</label>
+          <select class="w-auto" id="orden">
+            <option value="nombre">Nombre (A a Z)</option>
+            <option value="nombre-desc">Nombre (Z a A)</option>
+            <option value="carnet">Carnet</option>
+            <option value="semestre">Semestre</option>
+          </select>
+          <span class="ml-auto text-sm text-tinta-suave" id="contador"></span>
+        </div>
+        <div id="tabla-estudiantes"><div class="cargando">Cargando estudiantes…</div></div>
+      </section>
+
+      <dialog class="modal" id="modal-estudiante" aria-labelledby="titulo-form">
+        <div class="modal-encabezado">
+          <h2 id="titulo-form">Registrar estudiante</h2>
+          <button class="modal-cerrar" type="button" data-cerrar aria-label="Cerrar">×</button>
+        </div>
+        <form class="modal-cuerpo" id="form-estudiante" novalidate>
+          <div class="grid gap-3 sm:grid-cols-[1fr_8rem]">
+            <div class="campo">
+              <label for="carnet">Carnet</label>
+              <input id="carnet" name="carnet" required autofocus placeholder="0901-26-1009" pattern="\d{4}-\d{2}-\d{3,5}">
+              <small>Formato: 0901-26-1009</small>
+            </div>
+            <div class="campo">
+              <label for="semestre">Semestre</label>
+              <input id="semestre" name="semestre" type="number" min="1" max="10" value="1" required>
+            </div>
+          </div>
+          <div class="campo">
+            <label for="nombre">Nombre completo</label>
+            <input id="nombre" name="nombre" required placeholder="Nombre y apellido">
+          </div>
+          <div class="campo">
+            <label for="carrera">Carrera</label>
+            <input id="carrera" name="carrera" list="lista-carreras" value="Ingeniería en Sistemas">
+            <datalist id="lista-carreras">
+              <option value="Ingeniería en Sistemas">
+              <option value="Ingeniería Civil">
+              <option value="Ingeniería Industrial">
+            </datalist>
+          </div>
+          <div class="modal-botones">
+            <button class="btn btn-secundario" type="button" data-cerrar>Cancelar</button>
+            <button class="btn btn-primario" type="submit" id="btn-guardar">Guardar estudiante</button>
+          </div>
+        </form>
+      </dialog>
+    </main>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="vista-estudiantes.js"></script>
+</body>
+</html>

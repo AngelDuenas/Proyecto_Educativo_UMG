@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reportes | Pizarrón</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.18"></script>
+  <script src="../js/tema.js"></script>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body data-pagina="reportes" data-raiz="../">
+  <div class="min-h-screen md:grid md:grid-cols-[248px_1fr]">
+    <aside class="menu" id="menu"></aside>
+
+    <main class="contenido min-w-0 px-4 pt-8 pb-12 md:px-10">
+      <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1>Reportes</h1>
+          <p class="mt-1.5 max-w-[62ch] text-tinta-suave">Rankings ordenados por el servidor y los cursos que se desbloquean a partir de otro.</p>
+        </div>
+        <button class="btn btn-secundario" type="button" id="btn-imprimir">Imprimir reporte</button>
+      </header>
+
+      <div class="grid items-start gap-5 md:grid-cols-2">
+        <section class="panel" aria-labelledby="titulo-rank-notas">
+          <div class="panel-encabezado">
+            <h2 id="titulo-rank-notas">Ranking por promedio</h2>
+            <select class="w-auto" id="orden-notas" aria-label="Orden del ranking por promedio">
+              <option value="desc">Mejores primero</option>
+              <option value="asc">Más bajos primero</option>
+            </select>
+          </div>
+          <div id="ranking-notas"><div class="cargando">Cargando ranking…</div></div>
+        </section>
+
+        <section class="panel" aria-labelledby="titulo-rank-asis">
+          <div class="panel-encabezado">
+            <h2 id="titulo-rank-asis">Ranking por asistencia</h2>
+            <select class="w-auto" id="orden-asis" aria-label="Orden del ranking por asistencia">
+              <option value="desc">Más asistencia primero</option>
+              <option value="asc">Menos asistencia primero</option>
+            </select>
+          </div>
+          <div id="ranking-asistencia"><div class="cargando">Cargando ranking…</div></div>
+        </section>
+      </div>
+
+      <section class="panel mt-5" aria-labelledby="titulo-relacionados">
+        <div class="panel-encabezado">
+          <div>
+            <h2 id="titulo-relacionados">Cursos relacionados</h2>
+            <p>Elige un curso para ver, en orden de cercanía, los cursos que dependen de él (recorrido BFS del grafo).</p>
+          </div>
+          <select class="w-auto" id="curso-origen" aria-label="Curso de origen"></select>
+        </div>
+        <div id="relacionados"><div class="cargando">Cargando cursos…</div></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="vista-reportes.js"></script>
+</body>
+</html>

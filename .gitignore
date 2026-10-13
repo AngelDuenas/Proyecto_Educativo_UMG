@@ -6,6 +6,8 @@ build/
 *.pdb
 *.ilk
 
+claude.md
+
 # Editores / sistema
 .vscode/
 .idea/

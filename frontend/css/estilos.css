@@ -1,0 +1,80 @@
+/* =====================================================================
+   estilos.css · Lo poco que Tailwind no cubre bien
+   ---------------------------------------------------------------------
+   Colores, botones, tablas, etc. están en js/tema.js (Tailwind).
+   Aquí solo: fuentes, fondo cuadriculado, dibujos SVG del árbol y el
+   grafo, detalles del navegador e impresión. Usa los colores del tema
+   con var(--color-nombre).
+   ===================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Caveat:wght@700&family=Lexend:wght@400;500;700&display=swap");
+
+/* Hoja de cuaderno cuadriculada */
+.contenido {
+  background-image:
+    linear-gradient(var(--color-cuadricula) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-cuadricula) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* ---------- Árbol y grafo (SVG) ---------- */
+.lienzo svg { display: block; margin: 0 auto; }
+
+.arista { fill: none; stroke: var(--color-borde-fuerte); stroke-width: 1.5; }
+.arista.recorrida { stroke: var(--color-naranja-700); stroke-width: 3; }
+
+.nodo rect,
+.nodo circle {
+  fill: #fff;
+  stroke: var(--color-marino);
+  stroke-width: 2;
+  transition: fill 0.25s, stroke 0.25s;
+}
+
+.nodo text { font-family: var(--font-texto); font-size: 13px; fill: var(--color-tinta); pointer-events: none; }
+.nodo .nodo-tipo { font-size: 11px; fill: var(--color-tinta-suave); }
+
+/* Un color sólido por nivel del árbol */
+.nodo.nivel-0 rect { fill: var(--color-marino); }
+.nodo.nivel-1 rect { fill: var(--color-azul-700); stroke: var(--color-azul-700); }
+.nodo.nivel-2 rect { fill: var(--color-celeste); stroke: var(--color-azul-700); }
+.nodo.nivel-3 rect { fill: var(--color-amarillo); stroke: var(--color-amarillo); }
+.nodo.nivel-0 text,
+.nodo.nivel-1 text { fill: #fff; }
+.nodo.nivel-0 .nodo-tipo,
+.nodo.nivel-1 .nodo-tipo { fill: var(--color-celeste); }
+
+/* Recorridos: visitado en naranja, origen en azul marino */
+.nodo.visitado rect,
+.nodo.visitado circle { fill: var(--color-naranja-700); stroke: var(--color-naranja-700); }
+.nodo.origen circle { fill: var(--color-marino); }
+.nodo.visitado text:not(.nodo-nombre),
+.nodo.origen text:not(.nodo-nombre) { fill: #fff; }
+
+/* En el grafo el nombre va debajo del círculo, sobre fondo blanco */
+.nodo .nodo-nombre { font-size: 11px; fill: var(--color-tinta-suave); }
+
+.nodo-orden circle { fill: var(--color-amarillo); stroke: var(--color-marino); stroke-width: 1.5; }
+.nodo-orden text { fill: var(--color-marino); font-size: 11px; font-weight: 700; }
+
+/* ---------- Detalles del navegador ---------- */
+.input-nota { appearance: textfield; -moz-appearance: textfield; }
+.input-nota::-webkit-outer-spin-button,
+.input-nota::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+dialog::backdrop { background: rgb(5 40 58 / 0.55); }
+
+/* Entrada suave de las ventanas emergentes */
+dialog[open] { animation: aparecer 0.18s ease-out; }
+@keyframes aparecer { from { opacity: 0; translate: 0 12px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* ---------- Impresión (botón "Imprimir reporte") ---------- */
+@media print {
+  .menu, .aviso-demo, .toasts, header .btn, select { display: none !important; }
+  .contenido { background: none; padding: 0; }
+  .panel { box-shadow: none; break-inside: avoid; }
+}
