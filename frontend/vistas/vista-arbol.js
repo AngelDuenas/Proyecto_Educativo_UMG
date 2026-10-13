@@ -110,7 +110,7 @@ function dibujar() {
   // Leyenda: un color por nivel, con el tipo de nodo de ese nivel
   const tipos = [];
   lista.forEach((p) => (tipos[p.nivel] = tipos[p.nivel] || p.nodo.tipo));
-  const colores = ["var(--color-marino)", "var(--color-azul-700)", "var(--color-celeste)", "var(--color-amarillo)", "#fff"];
+  const colores = ["var(--color-marino)", "var(--color-azul-700)", "var(--color-celeste)", "var(--color-celeste-50)", "#fff"];
   leyendaEl.innerHTML = tipos
     .map((t, n) => `<span><i style="background:${colores[n] || colores[4]};border:1px solid var(--color-marino)"></i>${esc(t || "Nivel " + n)}</span>`)
     .join("");

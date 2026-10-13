@@ -82,9 +82,9 @@ function dibujarMenu() {
 
   aside.innerHTML = `
     <div class="menu-marca">
-      <a href="${raiz}index.html">
-        <strong>Pizarrón</strong>
-        <span>Gestión escolar UMG</span>
+      <a href="${raiz}index.html" aria-label="CLARD Academy · Inicio">
+        <img class="menu-logo" src="${raiz}img/logo-oscuro.jpg" alt="CLARD Academy">
+        <span class="menu-lema">Aprende · Crece · Avanza</span>
       </a>
       <button class="menu-boton" type="button" aria-expanded="false" aria-controls="menu-navegacion">Menú</button>
     </div>
@@ -100,30 +100,12 @@ function dibujarMenu() {
   });
 }
 
-/* ---------- Estado del servidor y aviso de demo ---------- */
+/* ---------- Estado del servidor (indicador en el pie del menú) ---------- */
 function actualizarEstado(estado) {
   const marca = document.querySelector(".estado-servidor");
   if (marca) {
     marca.dataset.estado = estado;
     marca.textContent = estado === "conectado" ? "Servidor C++ conectado" : "Sin servidor: datos de ejemplo";
-  }
-
-  if (estado === "demo" && !document.querySelector(".aviso-demo")) {
-    const main = document.querySelector(".contenido");
-    if (!main) return;
-    const aviso = document.createElement("div");
-    aviso.className = "aviso-demo";
-    aviso.setAttribute("role", "status");
-    aviso.innerHTML = `
-      <strong>Modo demo.</strong>
-      <span>El servidor C++ no respondió en ${esc(API_BASE)}, así que ves datos de ejemplo.
-      Los cambios se pierden al cerrar la pestaña.</span>
-      <button class="btn btn-secundario btn-chico" type="button">Restablecer datos</button>`;
-    aviso.querySelector("button").addEventListener("click", () => {
-      reiniciarDemo();
-      location.reload();
-    });
-    main.prepend(aviso);
   }
 }
 

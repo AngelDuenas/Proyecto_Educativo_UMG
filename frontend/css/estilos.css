@@ -2,26 +2,27 @@
    estilos.css · Lo poco que Tailwind no cubre bien
    ---------------------------------------------------------------------
    Colores, botones, tablas, etc. están en js/tema.js (Tailwind).
-   Aquí solo: fuentes, fondo cuadriculado, dibujos SVG del árbol y el
-   grafo, detalles del navegador e impresión. Usa los colores del tema
+   Aquí solo: fuentes, fondo, dibujos SVG del árbol y el grafo,
+   detalles del navegador e impresión. Usa los colores del tema
    con var(--color-nombre).
    ===================================================================== */
 
-@import url("https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@700;800&family=Caveat:wght@700&family=Lexend:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Lexend:wght@400;500;700&display=swap");
 
-/* Hoja de cuaderno cuadriculada */
+/* Fondo: manchas suaves inspiradas en el logo de CLARD Academy */
 .contenido {
-  background-image:
-    linear-gradient(var(--color-cuadricula) 1px, transparent 1px),
-    linear-gradient(90deg, var(--color-cuadricula) 1px, transparent 1px);
-  background-size: 24px 24px;
+  background:
+    radial-gradient(ellipse 520px 380px at 100% 0%, rgb(142 223 252 / 0.28), transparent 70%),
+    radial-gradient(ellipse 420px 320px at 0% 100%, rgb(142 223 252 / 0.16), transparent 70%),
+    var(--color-papel);
+  background-attachment: fixed;
 }
 
 /* ---------- Árbol y grafo (SVG) ---------- */
 .lienzo svg { display: block; margin: 0 auto; }
 
 .arista { fill: none; stroke: var(--color-borde-fuerte); stroke-width: 1.5; }
-.arista.recorrida { stroke: var(--color-naranja-700); stroke-width: 3; }
+.arista.recorrida { stroke: var(--color-amarillo); stroke-width: 3.5; }
 
 .nodo rect,
 .nodo circle {
@@ -34,39 +35,53 @@
 .nodo text { font-family: var(--font-texto); font-size: 13px; fill: var(--color-tinta); pointer-events: none; }
 .nodo .nodo-tipo { font-size: 11px; fill: var(--color-tinta-suave); }
 
-/* Un color sólido por nivel del árbol */
-.nodo.nivel-0 rect { fill: var(--color-marino); }
+/* Un color por nivel del árbol, de oscuro a claro */
+.nodo.nivel-0 rect { fill: var(--color-marino); stroke: var(--color-marino); }
 .nodo.nivel-1 rect { fill: var(--color-azul-700); stroke: var(--color-azul-700); }
-.nodo.nivel-2 rect { fill: var(--color-celeste); stroke: var(--color-azul-700); }
-.nodo.nivel-3 rect { fill: var(--color-amarillo); stroke: var(--color-amarillo); }
+.nodo.nivel-2 rect { fill: var(--color-celeste); stroke: var(--color-celeste); }
+.nodo.nivel-3 rect { fill: var(--color-celeste-50); stroke: var(--color-celeste); }
 .nodo.nivel-0 text,
 .nodo.nivel-1 text { fill: #fff; }
+.nodo.nivel-2 text { fill: var(--color-marino); }
 .nodo.nivel-0 .nodo-tipo,
 .nodo.nivel-1 .nodo-tipo { fill: var(--color-celeste); }
 
-/* Recorridos: visitado en naranja, origen en azul marino */
+/* Recorridos: visitado en naranja (triángulo del logo), origen en azul marino */
 .nodo.visitado rect,
-.nodo.visitado circle { fill: var(--color-naranja-700); stroke: var(--color-naranja-700); }
-.nodo.origen circle { fill: var(--color-marino); }
-.nodo.visitado text:not(.nodo-nombre),
+.nodo.visitado circle { fill: var(--color-amarillo); stroke: var(--color-amarillo); }
+.nodo.origen circle { fill: var(--color-marino); stroke: var(--color-marino); }
+.nodo.visitado text:not(.nodo-nombre) { fill: var(--color-marino); }
 .nodo.origen text:not(.nodo-nombre) { fill: #fff; }
 
 /* En el grafo el nombre va debajo del círculo, sobre fondo blanco */
 .nodo .nodo-nombre { font-size: 11px; fill: var(--color-tinta-suave); }
 
-.nodo-orden circle { fill: var(--color-amarillo); stroke: var(--color-marino); stroke-width: 1.5; }
+.nodo-orden circle { fill: var(--color-amarillo); stroke: #fff; stroke-width: 2; }
 .nodo-orden text { fill: var(--color-marino); font-size: 11px; font-weight: 700; }
 
 /* ---------- Detalles del navegador ---------- */
+
+/* Combobox: flecha propia en azul marino en lugar de la del navegador */
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23033857' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 1.1rem;
+}
+select:focus { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%2312ade0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12l4-4 4 4'/%3E%3C/svg%3E"); }
+select::-ms-expand { display: none; }
+
+option { color: var(--color-tinta); background: #fff; }
+
 .input-nota { appearance: textfield; -moz-appearance: textfield; }
 .input-nota::-webkit-outer-spin-button,
 .input-nota::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-dialog::backdrop { background: rgb(5 40 58 / 0.55); }
+dialog::backdrop { background: rgb(2 42 66 / 0.5); backdrop-filter: blur(3px); }
 
 /* Entrada suave de las ventanas emergentes */
-dialog[open] { animation: aparecer 0.18s ease-out; }
-@keyframes aparecer { from { opacity: 0; translate: 0 12px; } }
+dialog[open] { animation: aparecer 0.2s ease-out; }
+@keyframes aparecer { from { opacity: 0; translate: 0 12px; scale: 0.98; } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
