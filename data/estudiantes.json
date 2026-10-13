@@ -1,0 +1,44 @@
+[
+  {
+    "id": 1,
+    "nombre": "Diego",
+    "edad": 12,
+    "grado": "1ro Básico",
+    "seccion": "A"
+  },
+  {
+    "id": 2,
+    "nombre": "Carlos",
+    "edad": 13,
+    "grado": "1ro Básico",
+    "seccion": "B"
+  },
+  {
+    "id": 3,
+    "nombre": "Ana",
+    "edad": 14,
+    "grado": "2do Básico",
+    "seccion": "A"
+  },
+  {
+    "id": 4,
+    "nombre": "María",
+    "edad": 15,
+    "grado": "3ro Básico",
+    "seccion": "B"
+  },
+  {
+    "id": 5,
+    "nombre": "Luis",
+    "edad": 16,
+    "grado": "4to Diversificado",
+    "seccion": "A"
+  },
+  {
+    "id": 6,
+    "nombre": "Sofía",
+    "edad": 16,
+    "grado": "4to Diversificado",
+    "seccion": "A"
+  }
+]

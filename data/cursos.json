@@ -1,0 +1,42 @@
+[
+  {
+    "id": 1,
+    "nombre": "Matemática I",
+    "docente_id": 1
+  },
+  {
+    "id": 2,
+    "nombre": "Matemática II",
+    "docente_id": 1
+  },
+  {
+    "id": 3,
+    "nombre": "Álgebra Lineal",
+    "docente_id": 1
+  },
+  {
+    "id": 4,
+    "nombre": "Cálculo",
+    "docente_id": -1
+  },
+  {
+    "id": 5,
+    "nombre": "Programación I",
+    "docente_id": 2
+  },
+  {
+    "id": 6,
+    "nombre": "Programación II",
+    "docente_id": 2
+  },
+  {
+    "id": 7,
+    "nombre": "Estructuras de Datos",
+    "docente_id": 2
+  },
+  {
+    "id": 8,
+    "nombre": "Bases de Datos",
+    "docente_id": 3
+  }
+]
