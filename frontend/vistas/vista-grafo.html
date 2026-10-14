@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Prerrequisitos | CLARD Academy</title>
+  <link rel="icon" type="image/png" href="../img/icono.png">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.18"></script>
+  <script src="../js/tema.js"></script>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body data-pagina="grafo" data-raiz="../">
+  <div class="min-h-screen md:grid md:grid-cols-[248px_1fr]">
+    <aside class="menu" id="menu"></aside>
+
+    <main class="contenido min-w-0 px-4 pt-8 pb-12 md:px-10">
+      <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1>Prerrequisitos</h1>
+          <p class="mt-1.5 max-w-[62ch] text-tinta-suave">Grafo dirigido de cursos. Una flecha de A hacia B significa que A es prerrequisito de B.</p>
+        </div>
+      </header>
+
+      <section class="panel" aria-labelledby="titulo-grafo">
+        <div class="panel-encabezado">
+          <h2 id="titulo-grafo">Grafo de cursos</h2>
+          <div class="flex flex-wrap items-center gap-2">
+            <label class="sr-only" for="origen">Curso de origen</label>
+            <select class="w-auto" id="origen"></select>
+            <button class="btn btn-primario" type="button" data-recorrido="bfs">Recorrer en anchura (BFS)</button>
+            <button class="btn btn-secundario" type="button" data-recorrido="dfs">Recorrer en profundidad (DFS)</button>
+          </div>
+        </div>
+        <div class="lienzo" id="lienzo-grafo"><div class="cargando">Cargando grafo…</div></div>
+        <div class="mt-4" id="resultado" aria-live="polite">
+          <p class="dimension">Elige un curso de origen y un tipo de recorrido.</p>
+        </div>
+      </section>
+
+      <section class="panel mt-5" aria-labelledby="titulo-adyacencia">
+        <div class="panel-encabezado">
+          <div>
+            <h2 id="titulo-adyacencia">Matriz de adyacencia</h2>
+            <p>La celda [fila][columna] vale 1 cuando el curso de la fila es prerrequisito del curso de la columna.</p>
+          </div>
+          <span class="dimension" id="dimension"></span>
+        </div>
+        <div id="matriz-adyacencia"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="vista-grafo.js"></script>
+</body>
+</html>

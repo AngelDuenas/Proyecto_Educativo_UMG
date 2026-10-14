@@ -1,44 +1,50 @@
 [
   {
-    "id": 1,
-    "nombre": "Diego",
-    "edad": 12,
-    "grado": "1ro Básico",
-    "seccion": "A"
+    "carnet": "0901-26-1001",
+    "nombre": "Ana Lucía Pérez",
+    "carrera": "Ingeniería en Sistemas",
+    "semestre": 2
   },
   {
-    "id": 2,
-    "nombre": "Carlos",
-    "edad": 13,
-    "grado": "1ro Básico",
-    "seccion": "B"
+    "carnet": "0901-26-1002",
+    "nombre": "Bryan Estuardo López",
+    "carrera": "Ingeniería en Sistemas",
+    "semestre": 2
   },
   {
-    "id": 3,
-    "nombre": "Ana",
-    "edad": 14,
-    "grado": "2do Básico",
-    "seccion": "A"
+    "carnet": "0901-26-1003",
+    "nombre": "Carla Sofía Méndez",
+    "carrera": "Ingeniería en Sistemas",
+    "semestre": 2
   },
   {
-    "id": 4,
-    "nombre": "María",
-    "edad": 15,
-    "grado": "3ro Básico",
-    "seccion": "B"
+    "carnet": "0901-26-1004",
+    "nombre": "Diego Alejandro Ramírez",
+    "carrera": "Ingeniería en Sistemas",
+    "semestre": 2
   },
   {
-    "id": 5,
-    "nombre": "Luis",
-    "edad": 16,
-    "grado": "4to Diversificado",
-    "seccion": "A"
+    "carnet": "0901-26-1005",
+    "nombre": "Elena María Castillo",
+    "carrera": "Ingeniería en Sistemas",
+    "semestre": 2
   },
   {
-    "id": 6,
-    "nombre": "Sofía",
-    "edad": 16,
-    "grado": "4to Diversificado",
-    "seccion": "A"
+    "carnet": "0901-26-1006",
+    "nombre": "Fernando José Ajú",
+    "carrera": "Ingeniería en Sistemas",
+    "semestre": 2
+  },
+  {
+    "carnet": "0901-26-1007",
+    "nombre": "Gabriela Andrea Xol",
+    "carrera": "Ingeniería en Sistemas",
+    "semestre": 2
+  },
+  {
+    "carnet": "0901-26-1008",
+    "nombre": "Héctor Manuel Ortiz",
+    "carrera": "Ingeniería en Sistemas",
+    "semestre": 2
   }
 ]

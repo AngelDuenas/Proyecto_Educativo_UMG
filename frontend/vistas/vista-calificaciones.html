@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calificaciones | CLARD Academy</title>
+  <link rel="icon" type="image/png" href="../img/icono.png">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.18"></script>
+  <script src="../js/tema.js"></script>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body data-pagina="calificaciones" data-raiz="../">
+  <div class="min-h-screen md:grid md:grid-cols-[248px_1fr]">
+    <aside class="menu" id="menu"></aside>
+
+    <main class="contenido min-w-0 px-4 pt-8 pb-12 md:px-10">
+      <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1>Calificaciones</h1>
+          <p class="mt-1.5 max-w-[62ch] text-tinta-suave">Cada fila es un estudiante y cada columna un curso. Haz clic en una nota para cambiarla; se guarda al salir de la celda.</p>
+        </div>
+        <div class="leyenda" aria-label="Significado de los colores">
+          <span><i class="nota-alta"></i>70 a 100</span>
+          <span><i class="nota-media"></i>61 a 69</span>
+          <span><i class="nota-baja"></i>Menos de 61</span>
+        </div>
+      </header>
+
+      <section class="mb-5 grid grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-4" id="cifras" aria-label="Estadísticas"></section>
+
+      <section class="panel" aria-labelledby="titulo-matriz">
+        <div class="panel-encabezado">
+          <h2 id="titulo-matriz">Matriz de notas</h2>
+          <span class="dimension" id="dimension"></span>
+        </div>
+        <div id="matriz-notas"><div class="cargando">Cargando notas…</div></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="vista-calificaciones.js"></script>
+</body>
+</html>

@@ -1,6 +1,5 @@
-// DUEÑO: P1 · Tareas: T07
-// main.cpp SOLO crea el servidor y registra las rutas de cada módulo.
-// (Así nadie edita el mismo archivo y se evitan conflictos de Git.)
+// DUEÑO: P1 · main.cpp SOLO crea el servidor y registra las rutas de cada módulo
+// (así nadie edita el mismo archivo y se evitan conflictos de Git).
 #include <cstdlib>
 #include <exception>
 #include <iostream>
@@ -9,9 +8,8 @@
 #include "httplib.h"
 #include "json.hpp"
 
-#include "arbol.hpp"
 #include "asistencia.hpp"
-#include "docentes_cursos.hpp"
+#include "docentes.hpp"          // módulo de Cristian
 #include "estado.hpp"
 #include "estudiantes.hpp"
 #include "grafo.hpp"
@@ -19,11 +17,14 @@
 #include "persistencia.hpp"
 #include "reportes.hpp"
 #include "respuestas.hpp"
+#include "rutas_catalogo.hpp"
 
 int main() {
-    Estado estado;
+    Estado& estado = estado_global();
     inicializar_matrices(estado);
-    cargar_todo(estado);   // si no hay datos en data/, el sistema arranca vacío
+    cargar_datos_ejemplo(estado);      // arranca con los datos de ejemplo...
+    cargar_todo(estado);               // ...y si data/ tiene datos válidos, esos los reemplazan
+    inicializarDocentesYCursos();      // datos iniciales del módulo de Cristian
 
     httplib::Server svr;
 
@@ -55,17 +56,16 @@ int main() {
     svr.Get("/api/salud", [](const httplib::Request&, httplib::Response& res) {
         json datos = json::object();
         datos["servicio"] = "gestion-escolar";
-        datos["version"] = "0.1.0";
-        responder_ok(res, datos);
+        datos["version"] = "0.2.0";
+        responder_json(res, datos);
     });
 
     registrar_rutas_estudiantes(svr, estado);
-    registrar_rutas_docentes_cursos(svr, estado);
     registrar_rutas_notas(svr, estado);
     registrar_rutas_asistencia(svr, estado);
     registrar_rutas_reportes(svr, estado);
-    registrar_rutas_arbol(svr, estado);
     registrar_rutas_grafo(svr, estado);
+    registrar_rutas_catalogo(svr, estado);
     registrar_rutas_persistencia(svr, estado);
 
     int puerto = 8080;

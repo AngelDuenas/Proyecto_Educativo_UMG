@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Asistencia | CLARD Academy</title>
+  <link rel="icon" type="image/png" href="../img/icono.png">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.18"></script>
+  <script src="../js/tema.js"></script>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body data-pagina="asistencia" data-raiz="../">
+  <div class="min-h-screen md:grid md:grid-cols-[248px_1fr]">
+    <aside class="menu" id="menu"></aside>
+
+    <main class="contenido min-w-0 px-4 pt-8 pb-12 md:px-10">
+      <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1>Asistencia</h1>
+          <p class="mt-1.5 max-w-[62ch] text-tinta-suave">Matriz de asistencia de la semana. Haz clic en un día para cambiar entre presente y ausente.</p>
+        </div>
+        <div class="leyenda" aria-label="Significado de las marcas">
+          <span><i class="nota-alta"></i>Presente</span>
+          <span><i class="nota-baja"></i>Ausente</span>
+        </div>
+      </header>
+
+      <section class="mb-5 grid grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-4" id="cifras" aria-label="Resumen de asistencia"></section>
+
+      <section class="panel" aria-labelledby="titulo-asistencia">
+        <div class="panel-encabezado">
+          <h2 id="titulo-asistencia">Semana actual</h2>
+          <span class="dimension" id="dimension"></span>
+        </div>
+        <div id="matriz-asistencia"><div class="cargando">Cargando asistencia…</div></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="vista-asistencia.js"></script>
+</body>
+</html>

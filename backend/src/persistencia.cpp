@@ -1,40 +1,39 @@
-// DUEÑO: P2 · Tareas: T24
-// VERSIÓN BÁSICA: lee y escribe estudiantes, docentes, cursos, notas y asistencia.
-// Formato de data/:
-//   estudiantes.json -> [ {id, nombre, edad, grado, seccion}, ... ]
-//   docentes.json    -> [ {id, nombre, especialidad}, ... ]
-//   cursos.json      -> [ {id, nombre, docente_id}, ... ]
-//   notas.json       -> [ [n, n, null, ...], ... ]   una fila por estudiante, una columna por curso
-//   asistencia.json  -> [ [1, 0, 1, 1, null], ... ]  una fila por estudiante, una columna por día
-// Si un archivo no existe o está vacío, simplemente se ignora (el sistema arranca con lo que haya).
-// grafo.json y arbol.json los guardará/cargará P3.
-// TODO(P2, T24): copias de seguridad en data/backup/, validaciones extra y manejo de archivos corruptos.
+// DUEÑO: P2 · Tareas: T24 — VERSIÓN BÁSICA
+// Formato de los archivos en data/:
+//   estudiantes.json -> [ {carnet, nombre, carrera, semestre}, ... ]
+//   cursos.json      -> [ {codigo, nombre, creditos, semestre}, ... ]
+//   notas.json       -> { "0901-26-1001": { "MAT101": 85, "PRG101": 90 }, ... }   (solo las notas que existen)
+//   asistencia.json  -> { "0901-26-1001": [1,1,0,1,1], ... }
+// cargar_todo() solo reemplaza los datos si LOS CUATRO archivos existen y son válidos;
+// si no, deja intactos los datos que ya están en memoria (los de ejemplo).
+// TODO(P2, T24): copias de seguridad en data/backup/ y guardado de los prerrequisitos (grafo.json).
 #include "persistencia.hpp"
 
 #include <algorithm>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <map>
 #include <mutex>
 #include <sstream>
 #include <stdexcept>
 #include <vector>
 
+#include "algoritmos.hpp"
 #include "respuestas.hpp"
 
 namespace {
 
 enum class Lectura { NO_HAY, OK, INVALIDO };
 
-// Lee un archivo JSON. NO_HAY = no existe o está vacío; INVALIDO = tiene contenido inválido.
 Lectura leer_archivo(const std::string& ruta, json& salida) {
     std::ifstream archivo(ruta, std::ios::binary);
     if (!archivo.is_open()) return Lectura::NO_HAY;
     std::stringstream buffer;
     buffer << archivo.rdbuf();
     std::string texto = buffer.str();
-    if (texto.find_first_not_of(" \t\r\n") == std::string::npos) return Lectura::NO_HAY;
-    if (texto.compare(0, 3, "\xEF\xBB\xBF") == 0) texto.erase(0, 3);   // quita el BOM si lo hay
+    if (texto.find_first_not_of(" \t\r\n") == std::string::npos) return Lectura::NO_HAY;   // vacío
+    if (texto.compare(0, 3, "\xEF\xBB\xBF") == 0) texto.erase(0, 3);                       // quita el BOM
     salida = json::parse(texto, nullptr, false);
     return salida.is_discarded() ? Lectura::INVALIDO : Lectura::OK;
 }
@@ -52,48 +51,36 @@ bool guardar_todo(Estado& e, const std::string& dir) {
     std::error_code ec;
     std::filesystem::create_directories(dir, ec);
 
-    json estudiantes = json::array();
-    for (const Estudiante& s : e.estudiantes) {
-        json j = json::object();
-        j["id"] = s.id; j["nombre"] = s.nombre; j["edad"] = s.edad; j["grado"] = s.grado; j["seccion"] = s.seccion;
-        estudiantes.push_back(j);
-    }
-    json docentes = json::array();
-    for (const Docente& d : e.docentes) {
-        json j = json::object();
-        j["id"] = d.id; j["nombre"] = d.nombre; j["especialidad"] = d.especialidad;
-        docentes.push_back(j);
-    }
-    json cursos = json::array();
-    for (const Curso& c : e.cursos) {
-        json j = json::object();
-        j["id"] = c.id; j["nombre"] = c.nombre; j["docente_id"] = c.docente_id;
-        cursos.push_back(j);
-    }
-
     const size_t ne = std::min(e.estudiantes.size(), static_cast<size_t>(MAX_ESTUDIANTES));
     const size_t nc = std::min(e.cursos.size(), static_cast<size_t>(MAX_CURSOS));
-    json notas = json::array();
-    json asistencia = json::array();
-    for (size_t i = 0; i < ne; ++i) {
-        json fila_notas = json::array();
-        for (size_t j = 0; j < nc; ++j) {
-            if (e.notas[i][j] < 0.0f) fila_notas.push_back(nullptr);
-            else                      fila_notas.push_back(redondear(static_cast<double>(e.notas[i][j])));
-        }
-        notas.push_back(fila_notas);
 
-        json fila_asis = json::array();
-        for (int d = 0; d < DIAS_SEMANA; ++d) {
-            if (e.asistencia[i][d] == SIN_REGISTRO) fila_asis.push_back(nullptr);
-            else                                    fila_asis.push_back(e.asistencia[i][d]);
-        }
-        asistencia.push_back(fila_asis);
+    json estudiantes = json::array(), cursos = json::array();
+    json notas = json::object(), asistencia = json::object();
+
+    for (size_t i = 0; i < ne; ++i) {
+        const Estudiante& s = e.estudiantes[i];
+        json j = json::object();
+        j["carnet"] = s.carnet; j["nombre"] = s.nombre; j["carrera"] = s.carrera; j["semestre"] = s.semestre;
+        estudiantes.push_back(j);
+
+        json notas_estudiante = json::object();
+        for (size_t c = 0; c < nc; ++c)
+            if (e.notas[i][c] >= 0.0f) notas_estudiante[e.cursos[c].codigo] = redondear(static_cast<double>(e.notas[i][c]));
+        notas[s.carnet] = notas_estudiante;
+
+        json fila = json::array();
+        for (int d = 0; d < DIAS_SEMANA; ++d) fila.push_back(e.asistencia[i][d]);
+        asistencia[s.carnet] = fila;
+    }
+    for (size_t c = 0; c < nc; ++c) {
+        json j = json::object();
+        j["codigo"] = e.cursos[c].codigo; j["nombre"] = e.cursos[c].nombre;
+        j["creditos"] = e.cursos[c].creditos; j["semestre"] = e.cursos[c].semestre;
+        cursos.push_back(j);
     }
 
     bool todo_bien = true;
     todo_bien = escribir_archivo(dir + "/estudiantes.json", estudiantes) && todo_bien;
-    todo_bien = escribir_archivo(dir + "/docentes.json", docentes) && todo_bien;
     todo_bien = escribir_archivo(dir + "/cursos.json", cursos) && todo_bien;
     todo_bien = escribir_archivo(dir + "/notas.json", notas) && todo_bien;
     todo_bien = escribir_archivo(dir + "/asistencia.json", asistencia) && todo_bien;
@@ -101,117 +88,77 @@ bool guardar_todo(Estado& e, const std::string& dir) {
 }
 
 bool cargar_todo(Estado& e, const std::string& dir) {
-    json j_est, j_doc, j_cur, j_not, j_asi;
-    const Lectura l_est = leer_archivo(dir + "/estudiantes.json", j_est);
-    const Lectura l_doc = leer_archivo(dir + "/docentes.json", j_doc);
-    const Lectura l_cur = leer_archivo(dir + "/cursos.json", j_cur);
-    const Lectura l_not = leer_archivo(dir + "/notas.json", j_not);
-    const Lectura l_asi = leer_archivo(dir + "/asistencia.json", j_asi);
-
-    if (l_est == Lectura::INVALIDO || l_doc == Lectura::INVALIDO || l_cur == Lectura::INVALIDO ||
-        l_not == Lectura::INVALIDO || l_asi == Lectura::INVALIDO) {
-        std::cerr << "[persistencia] Hay un archivo JSON inválido en '" << dir << "'. No se cargó nada." << std::endl;
-        return false;
+    json j_est, j_cur, j_not, j_asi;
+    const Lectura l[4] = {
+        leer_archivo(dir + "/estudiantes.json", j_est), leer_archivo(dir + "/cursos.json", j_cur),
+        leer_archivo(dir + "/notas.json", j_not),       leer_archivo(dir + "/asistencia.json", j_asi)};
+    for (const Lectura& x : l) {
+        if (x != Lectura::OK) {
+            std::cerr << "[persistencia] No se cargaron los archivos de '" << dir << "' (faltan, están vacíos o son inválidos). Se usan los datos de ejemplo." << std::endl;
+            return false;
+        }
     }
 
-    // Primero se lee todo en variables temporales; el estado real solo se toca
-    // si TODO se leyó bien.
+    // Primero se lee todo en variables temporales; el estado real solo se toca si TODO se leyó bien.
     std::vector<Estudiante> estudiantes;
-    std::vector<Docente> docentes;
-    std::vector<Curso> cursos;
-    std::vector<std::vector<float>> notas;
-    std::vector<std::vector<int>> asistencia;
-
+    std::vector<CursoEstado> cursos;
+    std::map<std::string, std::map<std::string, double>> notas;
+    std::map<std::string, std::vector<int>> asistencia;
     try {
-        if (l_est == Lectura::OK) {
-            for (const json& s : j_est) {
-                Estudiante x;
-                x.id = s.at("id").get<int>();
-                x.nombre = s.at("nombre").get<std::string>();
-                x.edad = s.at("edad").get<int>();
-                x.grado = s.at("grado").get<std::string>();
-                x.seccion = s.at("seccion").get<std::string>();
-                estudiantes.push_back(x);
-            }
-            if (estudiantes.size() > static_cast<size_t>(MAX_ESTUDIANTES)) throw std::runtime_error("demasiados estudiantes");
+        if (!j_est.is_array() || !j_cur.is_array() || !j_not.is_object() || !j_asi.is_object())
+            throw std::runtime_error("estructura inesperada");
+        for (const json& s : j_est) {
+            Estudiante x;
+            x.carnet = s.at("carnet").get<std::string>();
+            x.nombre = s.at("nombre").get<std::string>();
+            x.carrera = s.value("carrera", std::string());
+            x.semestre = s.value("semestre", 1);
+            estudiantes.push_back(x);
         }
-        if (l_doc == Lectura::OK) {
-            for (const json& d : j_doc) {
-                Docente x;
-                x.id = d.at("id").get<int>();
-                x.nombre = d.at("nombre").get<std::string>();
-                x.especialidad = d.at("especialidad").get<std::string>();
-                docentes.push_back(x);
-            }
+        for (const json& c : j_cur) {
+            CursoEstado x;
+            x.codigo = c.at("codigo").get<std::string>();
+            x.nombre = c.at("nombre").get<std::string>();
+            x.creditos = c.value("creditos", 0);
+            x.semestre = c.value("semestre", 1);
+            cursos.push_back(x);
         }
-        if (l_cur == Lectura::OK) {
-            for (const json& c : j_cur) {
-                Curso x;
-                x.id = c.at("id").get<int>();
-                x.nombre = c.at("nombre").get<std::string>();
-                x.docente_id = c.value("docente_id", -1);
-                cursos.push_back(x);
-            }
-            if (cursos.size() > static_cast<size_t>(MAX_CURSOS)) throw std::runtime_error("demasiados cursos");
-        }
-        if (l_not == Lectura::OK) {
-            for (const json& fila : j_not) {
-                std::vector<float> f;
-                for (const json& celda : fila) f.push_back(celda.is_null() ? SIN_NOTA : celda.get<float>());
-                notas.push_back(f);
-            }
-        }
-        if (l_asi == Lectura::OK) {
-            for (const json& fila : j_asi) {
-                std::vector<int> f;
-                for (const json& celda : fila) f.push_back(celda.is_null() ? SIN_REGISTRO : celda.get<int>());
-                asistencia.push_back(f);
-            }
+        if (estudiantes.size() > static_cast<size_t>(MAX_ESTUDIANTES)) throw std::runtime_error("demasiados estudiantes");
+        if (cursos.size() > static_cast<size_t>(MAX_CURSOS)) throw std::runtime_error("demasiados cursos");
+
+        for (auto it = j_not.begin(); it != j_not.end(); ++it)
+            for (auto n = it.value().begin(); n != it.value().end(); ++n)
+                if (n.value().is_number()) notas[it.key()][n.key()] = n.value().get<double>();
+        for (auto it = j_asi.begin(); it != j_asi.end(); ++it) {
+            std::vector<int> fila;
+            for (const json& v : it.value()) fila.push_back(v.is_number() && v.get<double>() != 0.0 ? 1 : 0);
+            asistencia[it.key()] = fila;
         }
     } catch (const std::exception& ex) {
-        std::cerr << "[persistencia] Un archivo JSON no tiene el formato esperado: " << ex.what() << std::endl;
+        std::cerr << "[persistencia] Formato inesperado en data/: " << ex.what() << ". Se usan los datos de ejemplo." << std::endl;
         return false;
     }
 
     // ---- Aplicar al estado ----
-    if (l_est == Lectura::OK) {
-        e.estudiantes = estudiantes;
-        int mayor = 0;
-        for (const Estudiante& x : e.estudiantes) mayor = std::max(mayor, x.id);
-        e.siguiente_id_estudiante = mayor + 1;
+    e.estudiantes = estudiantes;
+    e.cursos = cursos;
+    for (int i = 0; i < MAX_ESTUDIANTES; ++i) {
+        for (int c = 0; c < MAX_CURSOS; ++c)  e.notas[i][c] = SIN_NOTA;
+        for (int d = 0; d < DIAS_SEMANA; ++d) e.asistencia[i][d] = 1;
     }
-    if (l_doc == Lectura::OK) {
-        e.docentes = docentes;
-        int mayor = 0;
-        for (const Docente& x : e.docentes) mayor = std::max(mayor, x.id);
-        e.siguiente_id_docente = mayor + 1;
+    for (size_t i = 0; i < e.estudiantes.size(); ++i) {
+        const auto fn = notas.find(e.estudiantes[i].carnet);
+        if (fn != notas.end()) {
+            for (size_t c = 0; c < e.cursos.size(); ++c) {
+                const auto nota = fn->second.find(e.cursos[c].codigo);
+                if (nota != fn->second.end()) e.notas[i][c] = static_cast<float>(nota->second);
+            }
+        }
+        const auto fa = asistencia.find(e.estudiantes[i].carnet);
+        if (fa != asistencia.end())
+            for (size_t d = 0; d < fa->second.size() && d < static_cast<size_t>(DIAS_SEMANA); ++d) e.asistencia[i][d] = fa->second[d];
     }
-    if (l_cur == Lectura::OK) {
-        e.cursos = cursos;
-        int mayor = 0;
-        for (const Curso& x : e.cursos) mayor = std::max(mayor, x.id);
-        e.siguiente_id_curso = mayor + 1;
-    }
-
-    // Si cambiaron los estudiantes o los cursos, las matrices viejas ya no sirven.
-    const bool reiniciar_notas = (l_est == Lectura::OK || l_cur == Lectura::OK || l_not == Lectura::OK);
-    const bool reiniciar_asistencia = (l_est == Lectura::OK || l_asi == Lectura::OK);
-    if (reiniciar_notas) {
-        for (int i = 0; i < MAX_ESTUDIANTES; ++i)
-            for (int j = 0; j < MAX_CURSOS; ++j) e.notas[i][j] = SIN_NOTA;
-    }
-    if (reiniciar_asistencia) {
-        for (int i = 0; i < MAX_ESTUDIANTES; ++i)
-            for (int d = 0; d < DIAS_SEMANA; ++d) e.asistencia[i][d] = SIN_REGISTRO;
-    }
-
-    const size_t ne = std::min(e.estudiantes.size(), static_cast<size_t>(MAX_ESTUDIANTES));
-    const size_t nc = std::min(e.cursos.size(), static_cast<size_t>(MAX_CURSOS));
-    for (size_t i = 0; i < notas.size() && i < ne; ++i)
-        for (size_t j = 0; j < notas[i].size() && j < nc; ++j) e.notas[i][j] = notas[i][j];
-    for (size_t i = 0; i < asistencia.size() && i < ne; ++i)
-        for (size_t d = 0; d < asistencia[i].size() && d < static_cast<size_t>(DIAS_SEMANA); ++d) e.asistencia[i][d] = asistencia[i][d];
-
+    reconstruir_adyacencia(e);   // los prerrequisitos de ejemplo se acomodan a los cursos cargados
     return true;
 }
 
@@ -224,7 +171,7 @@ void registrar_rutas_persistencia(httplib::Server& svr, Estado& estado) {
         }
         json datos = json::object();
         datos["guardado"] = true;
-        responder_ok(res, datos);
+        responder_json(res, datos);
     });
 
     svr.Post("/api/cargar", [&estado](const httplib::Request&, httplib::Response& res) {
@@ -235,6 +182,6 @@ void registrar_rutas_persistencia(httplib::Server& svr, Estado& estado) {
         }
         json datos = json::object();
         datos["cargado"] = true;
-        responder_ok(res, datos);
+        responder_json(res, datos);
     });
 }

@@ -1,4 +1,3 @@
-// DUEÑO: P1 · Tareas: T10
 #pragma once
 #include "estado.hpp"
 #include "httplib.h"

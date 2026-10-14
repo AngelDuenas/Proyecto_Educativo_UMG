@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Estructura académica | CLARD Academy</title>
+  <link rel="icon" type="image/png" href="../img/icono.png">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.18"></script>
+  <script src="../js/tema.js"></script>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body data-pagina="arbol" data-raiz="../">
+  <div class="min-h-screen md:grid md:grid-cols-[248px_1fr]">
+    <aside class="menu" id="menu"></aside>
+
+    <main class="contenido min-w-0 px-4 pt-8 pb-12 md:px-10">
+      <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1>Estructura académica</h1>
+          <p class="mt-1.5 max-w-[62ch] text-tinta-suave">Árbol de la universidad: cada nodo tiene hijos, desde la raíz hasta los cursos, que son las hojas.</p>
+        </div>
+        <button class="btn btn-primario" type="button" id="btn-recorrer">Recorrer en preorden</button>
+      </header>
+
+      <section class="mb-5 grid grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-4" id="cifras" aria-label="Datos del árbol"></section>
+
+      <section class="panel" aria-labelledby="titulo-arbol">
+        <div class="panel-encabezado">
+          <h2 id="titulo-arbol">Árbol</h2>
+          <div class="leyenda" id="leyenda-niveles"></div>
+        </div>
+        <div class="lienzo" id="lienzo-arbol"><div class="cargando">Cargando árbol…</div></div>
+      </section>
+
+      <section class="panel mt-5" aria-labelledby="titulo-recorrido">
+        <div class="panel-encabezado">
+          <div>
+            <h2 id="titulo-recorrido">Recorrido en preorden</h2>
+            <p>Primero se visita el nodo y luego, de izquierda a derecha, cada uno de sus hijos.</p>
+          </div>
+        </div>
+        <ol class="recorrido-lista" id="recorrido"></ol>
+      </section>
+    </main>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="vista-arbol.js"></script>
+</body>
+</html>

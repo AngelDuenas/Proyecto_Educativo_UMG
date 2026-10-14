@@ -5,7 +5,7 @@
 #include "estado.hpp"
 #include "httplib.h"
 
-// Guardan/cargan el estado en archivos JSON dentro de `dir` (por defecto "data").
+// Guardan/cargan estudiantes, cursos, notas y asistencia en archivos JSON dentro de `dir`.
 // No bloquean el mutex: quien las llame desde un handler debe bloquearlo antes.
 bool guardar_todo(Estado& e, const std::string& dir = "data");
 bool cargar_todo(Estado& e, const std::string& dir = "data");

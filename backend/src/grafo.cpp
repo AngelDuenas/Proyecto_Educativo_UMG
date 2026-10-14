@@ -1,11 +1,13 @@
-// DUEÑO: P3 · Tareas: T21, T26
-// BASE MÍNIMA (la completa P3): GET /api/grafo arma vértices, aristas y matriz
-// a partir de estado.adyacencia. BFS, DFS y ruta responden 501.
+// DUEÑO: P3 (base mínima hecha por P1 para que la vista funcione; P3 puede mejorarla o reemplazarla)
+//   GET /api/grafo                      -> {nodos:[{codigo,nombre}], matriz:[[0,1,...]]}
+//   GET /api/grafo/bfs?origen=MAT101    -> {origen, orden:["MAT101","MAT102",...]}
+//   GET /api/grafo/dfs?origen=MAT101    -> igual, en profundidad
 #include "grafo.hpp"
 
 #include <algorithm>
 #include <mutex>
 
+#include "algoritmos.hpp"
 #include "respuestas.hpp"
 
 void registrar_rutas_grafo(httplib::Server& svr, Estado& estado) {
@@ -13,45 +15,40 @@ void registrar_rutas_grafo(httplib::Server& svr, Estado& estado) {
         std::lock_guard<std::mutex> candado(estado.mtx);
         const size_t n = std::min(estado.cursos.size(), static_cast<size_t>(MAX_CURSOS));
 
-        json vertices = json::array(), aristas = json::array(), matriz = json::array();
+        json nodos = json::array(), matriz = json::array();
         for (size_t i = 0; i < n; ++i) {
             json v = json::object();
-            v["id"] = estado.cursos[i].id;
+            v["codigo"] = estado.cursos[i].codigo;
             v["nombre"] = estado.cursos[i].nombre;
-            vertices.push_back(v);
+            nodos.push_back(v);
 
             json fila = json::array();
-            for (size_t j = 0; j < n; ++j) {
-                fila.push_back(estado.adyacencia[i][j]);
-                if (estado.adyacencia[i][j] == 1) {
-                    json a = json::object();
-                    a["desde"] = estado.cursos[i].id;   // prerrequisito
-                    a["hasta"] = estado.cursos[j].id;   // curso que lo requiere
-                    aristas.push_back(a);
-                }
-            }
+            for (size_t j = 0; j < n; ++j) fila.push_back(estado.adyacencia[i][j]);
             matriz.push_back(fila);
         }
-
         json datos = json::object();
-        datos["vertices"] = vertices;
-        datos["aristas"] = aristas;
+        datos["nodos"] = nodos;
         datos["matriz"] = matriz;
-        responder_ok(res, datos);
+        responder_json(res, datos);
     });
 
-    // TODO(P3, T21): POST /api/grafo/arista {desde, hasta}
-    svr.Post("/api/grafo/arista", [](const httplib::Request&, httplib::Response& res) {
-        responder_error(res, "No implementado todavía.", 501);
-    });
-    // TODO(P3, T26): BFS, DFS y ruta de prerrequisitos
-    svr.Get("/api/grafo/bfs", [](const httplib::Request&, httplib::Response& res) {
-        responder_error(res, "No implementado todavía.", 501);
-    });
-    svr.Get("/api/grafo/dfs", [](const httplib::Request&, httplib::Response& res) {
-        responder_error(res, "No implementado todavía.", 501);
-    });
-    svr.Get("/api/grafo/ruta", [](const httplib::Request&, httplib::Response& res) {
-        responder_error(res, "No implementado todavía.", 501);
+    svr.Get(R"(/api/grafo/(bfs|dfs))", [&estado](const httplib::Request& req, httplib::Response& res) {
+        const std::string tipo = req.matches[1].str();
+        const std::string origen = req.get_param_value("origen");
+
+        std::lock_guard<std::mutex> candado(estado.mtx);
+        const int inicio = indice_curso(estado, origen);
+        if (inicio < 0) {
+            responder_error(res, "No existe el curso " + origen + ".", 404);
+            return;
+        }
+        const std::vector<int> recorrido = (tipo == "bfs") ? recorrido_bfs(estado, inicio) : recorrido_dfs(estado, inicio);
+
+        json orden = json::array();
+        for (int idx : recorrido) orden.push_back(estado.cursos[static_cast<size_t>(idx)].codigo);
+        json datos = json::object();
+        datos["origen"] = origen;
+        datos["orden"] = orden;
+        responder_json(res, datos);
     });
 }

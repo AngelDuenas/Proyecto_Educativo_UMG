@@ -1,22 +1,40 @@
-// DUEÑO: P4 · Tareas: T25
-// BASE MÍNIMA (la completa P4): devuelven listas vacías.
-// Pista: para el ranking pueden usar promedio_estudiante() de notas.hpp y
-// porcentaje_asistencia() de asistencia.hpp.
+// DUEÑO: P4 · Reportes — formato definido por vista-reportes.js
+//   GET /api/reportes -> {rankingNotas:[{carnet,nombre,promedio}], rankingAsistencia:[{carnet,nombre,porcentaje}]}
+//   (ambos ya ordenados de mayor a menor)
 #include "reportes.hpp"
 
+#include <mutex>
+
+#include "algoritmos.hpp"
 #include "respuestas.hpp"
 
-void registrar_rutas_reportes(httplib::Server& svr, Estado& /*estado*/) {
-    // TODO(P4, T25): estudiantes ordenados por promedio (descendente)
-    svr.Get("/api/reportes/ranking", [](const httplib::Request&, httplib::Response& res) {
-        responder_ok(res, json::array());
-    });
-    // TODO(P4, T25): ranking de asistencia
-    svr.Get("/api/reportes/asistencia", [](const httplib::Request&, httplib::Response& res) {
-        responder_ok(res, json::array());
-    });
-    // TODO(P4, T25): cursos relacionados usando el BFS del módulo grafo (P3)
-    svr.Get("/api/reportes/cursos-relacionados", [](const httplib::Request&, httplib::Response& res) {
-        responder_ok(res, json::array());
+void registrar_rutas_reportes(httplib::Server& svr, Estado& estado) {
+    svr.Get("/api/reportes", [&estado](const httplib::Request&, httplib::Response& res) {
+        std::lock_guard<std::mutex> candado(estado.mtx);
+
+        json ranking_notas = json::array();
+        for (size_t i : ranking_por_promedio(estado)) {
+            double p = 0.0;
+            promedio_estudiante(estado, i, p);
+            json o = json::object();
+            o["carnet"] = estado.estudiantes[i].carnet;
+            o["nombre"] = estado.estudiantes[i].nombre;
+            o["promedio"] = redondear(p);
+            ranking_notas.push_back(o);
+        }
+
+        json ranking_asistencia = json::array();
+        for (size_t i : ranking_por_asistencia(estado)) {
+            json o = json::object();
+            o["carnet"] = estado.estudiantes[i].carnet;
+            o["nombre"] = estado.estudiantes[i].nombre;
+            o["porcentaje"] = porcentaje_estudiante(estado, i);
+            ranking_asistencia.push_back(o);
+        }
+
+        json datos = json::object();
+        datos["rankingNotas"] = ranking_notas;
+        datos["rankingAsistencia"] = ranking_asistencia;
+        responder_json(res, datos);
     });
 }
