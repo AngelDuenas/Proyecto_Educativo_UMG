@@ -1,12 +1,5 @@
-#ifndef NOTAS_HPP
-#define NOTAS_HPP
+#pragma once
+#include "estado.hpp"
+#include "httplib.h"
 
-#include <string>
-
-
-void inicializarNotas();
-std::string obtenerNotasJSON();
-std::string obtenerEstadisticasJSON();
-bool actualizarNota(const std::string& carnet, const std::string& cursoCodigo, float* nuevaNota);
-
-#endif
+void registrar_rutas_notas(httplib::Server& svr, Estado& estado);

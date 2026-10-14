@@ -1,35 +1,43 @@
-# DUEÑO: P5 · Tareas: T02 (repo y guía de compilación)
-# Uso:  make        → compila build/gestion_escolar
-#       make run    → compila y ejecuta (desde la raíz del repo)
-#       make clean  → borra build/
+# Makefile - Operación Pizarrón
+# Uso (desde la raíz del repo, en la terminal Git Bash):
+#   mingw32-make        compila a build/gestion_escolar.exe   (en Linux/macOS: make)
+#   mingw32-make -j4    lo mismo, pero más rápido (compila varios archivos a la vez)
+#   mingw32-make run    compila y ejecuta
+#   mingw32-make clean  borra la carpeta build/
 
 CXX      ?= g++
-CXXFLAGS := -std=c++17 -O2 -Wall -Wextra -pthread
-SRC      := $(wildcard backend/src/*.cpp)
-OBJ      := $(patsubst backend/src/%.cpp,build/obj/%.o,$(SRC))
+CXXFLAGS := -std=c++17 -O2 -Wall -Wextra -pthread -isystem backend/third_party -Ibackend/src
+LDFLAGS  := -pthread
+LDLIBS   :=
+EJECUTABLE := build/gestion_escolar
 
 ifeq ($(OS),Windows_NT)
-    CXXFLAGS += -D_WIN32_WINNT=0x0A00
-    LIBS     := -lws2_32 -lwsock32 -lcrypt32
-    BIN      := build/gestion_escolar.exe
-else
-    LIBS     :=
-    BIN      := build/gestion_escolar
+	CXXFLAGS += -D_WIN32_WINNT=0x0A00
+	LDLIBS   += -lws2_32 -lwsock32
+	EJECUTABLE := build/gestion_escolar.exe
 endif
 
-.PHONY: all run clean
+FUENTES := $(wildcard backend/src/*.cpp)
+OBJETOS := $(patsubst backend/src/%.cpp,build/%.o,$(FUENTES))
+DEPENDENCIAS := $(OBJETOS:.o=.d)
 
-all: $(BIN)
+all: $(EJECUTABLE)
 
-$(BIN): $(OBJ)
-	$(CXX) $(CXXFLAGS) -o $@ $^ $(LIBS)
+$(EJECUTABLE): $(OBJETOS)
+	$(CXX) $(OBJETOS) -o $@ $(LDFLAGS) $(LDLIBS)
 
-build/obj/%.o: backend/src/%.cpp $(wildcard backend/src/*.hpp)
-	@mkdir -p build/obj
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+build/%.o: backend/src/%.cpp | build
+	$(CXX) $(CXXFLAGS) -MMD -MP -c $< -o $@
 
-run: $(BIN)
-	./$(BIN)
+build:
+	mkdir -p build
+
+run: all
+	./$(EJECUTABLE)
 
 clean:
 	rm -rf build
+
+-include $(DEPENDENCIAS)
+
+.PHONY: all run clean

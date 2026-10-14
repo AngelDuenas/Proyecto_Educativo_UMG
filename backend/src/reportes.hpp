@@ -1,10 +1,5 @@
-#ifndef REPORTES_HPP
-#define REPORTES_HPP
+#pragma once
+#include "estado.hpp"
+#include "httplib.h"
 
-#include <string>
-
-// { "rankingNotas": [{carnet, nombre, promedio}], "rankingAsistencia": [{carnet, nombre, porcentaje}] }
-// Ambos ordenados de mayor a menor. Usa los datos de notas, asistencia y estudiantes.
-std::string obtenerReportesJSON();
-
-#endif
+void registrar_rutas_reportes(httplib::Server& svr, Estado& estado);

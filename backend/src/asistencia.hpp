@@ -1,10 +1,5 @@
-#ifndef ASISTENCIA_HPP
-#define ASISTENCIA_HPP
+#pragma once
+#include "estado.hpp"
+#include "httplib.h"
 
-#include <string>
-
-void inicializarAsistencia();
-std::string obtenerAsistenciaJSON();
-bool actualizarAsistencia(const std::string& carnet, int diaIndex, int valor);
-
-#endif
+void registrar_rutas_asistencia(httplib::Server& svr, Estado& estado);

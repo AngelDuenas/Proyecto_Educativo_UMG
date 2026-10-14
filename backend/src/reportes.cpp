@@ -1,63 +1,40 @@
+// DUEÑO: P4 · Reportes — formato definido por vista-reportes.js
+//   GET /api/reportes -> {rankingNotas:[{carnet,nombre,promedio}], rankingAsistencia:[{carnet,nombre,porcentaje}]}
+//   (ambos ya ordenados de mayor a menor)
 #include "reportes.hpp"
 
-#include <algorithm>
-#include <map>
+#include <mutex>
 
-#include "../third_party/json.hpp"
-#include "asistencia.hpp"
-#include "estudiantes.hpp"
-#include "notas.hpp"
+#include "algoritmos.hpp"
+#include "respuestas.hpp"
 
-using json = nlohmann::json;
+void registrar_rutas_reportes(httplib::Server& svr, Estado& estado) {
+    svr.Get("/api/reportes", [&estado](const httplib::Request&, httplib::Response& res) {
+        std::lock_guard<std::mutex> candado(estado.mtx);
 
-// Los módulos devuelven texto JSON; aquí se interpreta para combinarlos.
-static json leer(const std::string& texto) {
-    json j = json::parse(texto, nullptr, false);
-    return j.is_discarded() ? json() : j;
-}
-
-std::string obtenerReportesJSON() {
-    // carnet → nombre
-    std::map<std::string, std::string> nombres;
-    json estudiantes = leer(obtenerEstudiantesJSON("", ""));
-    if (estudiantes.is_array())
-        for (const auto& e : estudiantes) nombres[e.value("carnet", "")] = e.value("nombre", "");
-
-    auto nombreDe = [&nombres](const std::string& carnet) {
-        auto it = nombres.find(carnet);
-        return it != nombres.end() ? it->second : carnet;
-    };
-
-    // Ranking por promedio (se omiten estudiantes sin notas)
-    json rankingNotas = json::array();
-    json stats = leer(obtenerEstadisticasJSON());
-    if (stats.contains("porEstudiante") && stats["porEstudiante"].is_array()) {
-        for (const auto& p : stats["porEstudiante"]) {
-            if (!p.contains("promedio") || !p["promedio"].is_number()) continue;
-            const std::string carnet = p.value("carnet", "");
-            rankingNotas.push_back({{"carnet", carnet}, {"nombre", nombreDe(carnet)}, {"promedio", p["promedio"]}});
+        json ranking_notas = json::array();
+        for (size_t i : ranking_por_promedio(estado)) {
+            double p = 0.0;
+            promedio_estudiante(estado, i, p);
+            json o = json::object();
+            o["carnet"] = estado.estudiantes[i].carnet;
+            o["nombre"] = estado.estudiantes[i].nombre;
+            o["promedio"] = redondear(p);
+            ranking_notas.push_back(o);
         }
-    }
-    std::stable_sort(rankingNotas.begin(), rankingNotas.end(), [](const json& a, const json& b) {
-        return a["promedio"].get<double>() > b["promedio"].get<double>();
-    });
 
-    // Ranking por asistencia
-    json rankingAsistencia = json::array();
-    json asis = leer(obtenerAsistenciaJSON());
-    if (asis.contains("estudiantes") && asis.contains("porEstudiante")) {
-        const json& lista = asis["estudiantes"];
-        const json& porcentajes = asis["porEstudiante"];
-        for (size_t i = 0; i < lista.size() && i < porcentajes.size(); i++) {
-            const std::string carnet = lista[i].value("carnet", "");
-            rankingAsistencia.push_back({{"carnet", carnet},
-                                         {"nombre", lista[i].value("nombre", nombreDe(carnet))},
-                                         {"porcentaje", porcentajes[i]}});
+        json ranking_asistencia = json::array();
+        for (size_t i : ranking_por_asistencia(estado)) {
+            json o = json::object();
+            o["carnet"] = estado.estudiantes[i].carnet;
+            o["nombre"] = estado.estudiantes[i].nombre;
+            o["porcentaje"] = porcentaje_estudiante(estado, i);
+            ranking_asistencia.push_back(o);
         }
-    }
-    std::stable_sort(rankingAsistencia.begin(), rankingAsistencia.end(), [](const json& a, const json& b) {
-        return a["porcentaje"].get<double>() > b["porcentaje"].get<double>();
-    });
 
-    return json{{"rankingNotas", rankingNotas}, {"rankingAsistencia", rankingAsistencia}}.dump();
+        json datos = json::object();
+        datos["rankingNotas"] = ranking_notas;
+        datos["rankingAsistencia"] = ranking_asistencia;
+        responder_json(res, datos);
+    });
 }

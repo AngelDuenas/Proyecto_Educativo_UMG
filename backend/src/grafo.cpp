@@ -1,103 +1,54 @@
+// DUEÑO: P3 (base mínima hecha por P1 para que la vista funcione; P3 puede mejorarla o reemplazarla)
+//   GET /api/grafo                      -> {nodos:[{codigo,nombre}], matriz:[[0,1,...]]}
+//   GET /api/grafo/bfs?origen=MAT101    -> {origen, orden:["MAT101","MAT102",...]}
+//   GET /api/grafo/dfs?origen=MAT101    -> igual, en profundidad
 #include "grafo.hpp"
 
-#include <queue>
-#include <vector>
+#include <algorithm>
+#include <mutex>
 
-#include "../third_party/json.hpp"
-#include "docentes.hpp"
+#include "algoritmos.hpp"
+#include "respuestas.hpp"
 
-using json = nlohmann::json;
+void registrar_rutas_grafo(httplib::Server& svr, Estado& estado) {
+    svr.Get("/api/grafo", [&estado](const httplib::Request&, httplib::Response& res) {
+        std::lock_guard<std::mutex> candado(estado.mtx);
+        const size_t n = std::min(estado.cursos.size(), static_cast<size_t>(MAX_CURSOS));
 
-const int MAX_CURSOS_GRAFO = 50;
+        json nodos = json::array(), matriz = json::array();
+        for (size_t i = 0; i < n; ++i) {
+            json v = json::object();
+            v["codigo"] = estado.cursos[i].codigo;
+            v["nombre"] = estado.cursos[i].nombre;
+            nodos.push_back(v);
 
-// Prerrequisitos semilla: { prerrequisito, curso que desbloquea }.
-// Solo se usan las aristas cuyos dos cursos existen.
-static const char* ARISTAS[][2] = {
-    {"MAT101", "MAT102"}, {"MAT101", "FIS101"}, {"MAT102", "ALG201"},
-    {"LOG101", "MDS201"}, {"MAT102", "MDS201"}, {"PRG101", "PRG102"},
-    {"PRG102", "PRG201"}, {"MDS201", "EDD301"}, {"PRG201", "EDD301"},
-};
-
-struct Grafo {
-    std::vector<std::string> codigos;
-    std::vector<std::string> nombres;
-    int adyacencia[MAX_CURSOS_GRAFO][MAX_CURSOS_GRAFO] = {};
-};
-
-static int indiceCurso(const Grafo& g, const std::string& codigo) {
-    for (size_t i = 0; i < g.codigos.size(); i++)
-        if (g.codigos[i] == codigo) return static_cast<int>(i);
-    return -1;
-}
-
-// Se arma en cada llamada a partir de los cursos actuales, así refleja altas y bajas.
-static Grafo construirGrafo() {
-    Grafo g;
-    json cursos = json::parse(obtenerCursosJSON(), nullptr, false);
-    if (cursos.is_array()) {
-        for (const auto& c : cursos) {
-            if (g.codigos.size() >= static_cast<size_t>(MAX_CURSOS_GRAFO)) break;
-            g.codigos.push_back(c.value("codigo", ""));
-            g.nombres.push_back(c.value("nombre", ""));
+            json fila = json::array();
+            for (size_t j = 0; j < n; ++j) fila.push_back(estado.adyacencia[i][j]);
+            matriz.push_back(fila);
         }
-    }
-    for (const auto& arista : ARISTAS) {
-        int a = indiceCurso(g, arista[0]);
-        int b = indiceCurso(g, arista[1]);
-        if (a >= 0 && b >= 0) g.adyacencia[a][b] = 1;
-    }
-    return g;
-}
+        json datos = json::object();
+        datos["nodos"] = nodos;
+        datos["matriz"] = matriz;
+        responder_json(res, datos);
+    });
 
-static void dfs(const Grafo& g, int actual, std::vector<bool>& visitado, std::vector<int>& orden) {
-    visitado[actual] = true;
-    orden.push_back(actual);
-    for (size_t j = 0; j < g.codigos.size(); j++)
-        if (g.adyacencia[actual][j] == 1 && !visitado[j]) dfs(g, static_cast<int>(j), visitado, orden);
-}
+    svr.Get(R"(/api/grafo/(bfs|dfs))", [&estado](const httplib::Request& req, httplib::Response& res) {
+        const std::string tipo = req.matches[1].str();
+        const std::string origen = req.get_param_value("origen");
 
-std::string obtenerGrafoJSON() {
-    Grafo g = construirGrafo();
-    const size_t n = g.codigos.size();
-    json nodos = json::array(), matriz = json::array();
-    for (size_t i = 0; i < n; i++) {
-        nodos.push_back({{"codigo", g.codigos[i]}, {"nombre", g.nombres[i]}});
-        json fila = json::array();
-        for (size_t j = 0; j < n; j++) fila.push_back(g.adyacencia[i][j]);
-        matriz.push_back(fila);
-    }
-    return json{{"nodos", nodos}, {"matriz", matriz}}.dump();
-}
-
-bool recorrerGrafoJSON(const std::string& origen, bool anchura, std::string& salida) {
-    Grafo g = construirGrafo();
-    const int inicio = indiceCurso(g, origen);
-    if (inicio < 0) return false;
-
-    std::vector<bool> visitado(g.codigos.size(), false);
-    std::vector<int> orden;
-
-    if (anchura) {
-        std::queue<int> cola;
-        cola.push(inicio);
-        visitado[inicio] = true;
-        while (!cola.empty()) {
-            int actual = cola.front();
-            cola.pop();
-            orden.push_back(actual);
-            for (size_t j = 0; j < g.codigos.size(); j++) {
-                if (g.adyacencia[actual][j] == 1 && !visitado[j]) {
-                    visitado[j] = true;
-                    cola.push(static_cast<int>(j));
-                }
-            }
+        std::lock_guard<std::mutex> candado(estado.mtx);
+        const int inicio = indice_curso(estado, origen);
+        if (inicio < 0) {
+            responder_error(res, "No existe el curso " + origen + ".", 404);
+            return;
         }
-    } else {
-        dfs(g, inicio, visitado, orden);
-    }
+        const std::vector<int> recorrido = (tipo == "bfs") ? recorrido_bfs(estado, inicio) : recorrido_dfs(estado, inicio);
 
-    json codigos = json::array();
-    for (int i : orden) codigos.push_back(g.codigos[i]);
-    salida = json{{"origen", origen}, {"orden", codigos}}.dump();
-    return true;
+        json orden = json::array();
+        for (int idx : recorrido) orden.push_back(estado.cursos[static_cast<size_t>(idx)].codigo);
+        json datos = json::object();
+        datos["origen"] = origen;
+        datos["orden"] = orden;
+        responder_json(res, datos);
+    });
 }
