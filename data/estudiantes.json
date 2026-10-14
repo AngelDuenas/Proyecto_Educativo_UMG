@@ -1,0 +1,50 @@
+[
+  {
+    "carnet": "0901-26-1001",
+    "nombre": "Ana Lucía Pérez",
+    "carrera": "Ingeniería en Sistemas",
+    "semestre": 2
+  },
+  {
+    "carnet": "0901-26-1002",
+    "nombre": "Bryan Estuardo López",
+    "carrera": "Ingeniería en Sistemas",
+    "semestre": 2
+  },
+  {
+    "carnet": "0901-26-1003",
+    "nombre": "Carla Sofía Méndez",
+    "carrera": "Ingeniería en Sistemas",
+    "semestre": 2
+  },
+  {
+    "carnet": "0901-26-1004",
+    "nombre": "Diego Alejandro Ramírez",
+    "carrera": "Ingeniería en Sistemas",
+    "semestre": 2
+  },
+  {
+    "carnet": "0901-26-1005",
+    "nombre": "Elena María Castillo",
+    "carrera": "Ingeniería en Sistemas",
+    "semestre": 2
+  },
+  {
+    "carnet": "0901-26-1006",
+    "nombre": "Fernando José Ajú",
+    "carrera": "Ingeniería en Sistemas",
+    "semestre": 2
+  },
+  {
+    "carnet": "0901-26-1007",
+    "nombre": "Gabriela Andrea Xol",
+    "carrera": "Ingeniería en Sistemas",
+    "semestre": 2
+  },
+  {
+    "carnet": "0901-26-1008",
+    "nombre": "Héctor Manuel Ortiz",
+    "carrera": "Ingeniería en Sistemas",
+    "semestre": 2
+  }
+]
