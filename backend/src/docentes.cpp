@@ -1,5 +1,7 @@
 #include "docentes.hpp"
 
+#include <algorithm>
+
 const int MAX_REGISTROS = 50;
 
 static Docente listaDocentes[MAX_REGISTROS];
@@ -71,9 +73,26 @@ std::string obtenerAsignacionesJSON() {
     return r + "]";
 }
 
+// Siguiente id libre: uno más que el mayor usado (D01, D02, ..., D10). Cuenta también los eliminados,
+// así un id nunca se reutiliza.
+static std::string siguienteIdDocente() {
+    int mayor = 0;
+    for (int i = 0; i < totalDocentes; i++) {
+        const std::string& id = listaDocentes[i].id;
+        if (id.size() > 1 && id[0] == 'D') {
+            try {
+                mayor = std::max(mayor, std::stoi(id.substr(1)));
+            } catch (...) {
+            }
+        }
+    }
+    const std::string numero = std::to_string(mayor + 1);
+    return "D" + (numero.size() < 2 ? "0" + numero : numero);
+}
+
 bool crearDocente(const std::string& nombre, const std::string& especialidad) {
     if (totalDocentes >= MAX_REGISTROS) return false;
-    std::string nuevoId = "D0" + std::to_string(totalDocentes + 1);
+    std::string nuevoId = siguienteIdDocente();
     listaDocentes[totalDocentes] = {nuevoId, nombre, especialidad, true};
     totalDocentes++;
     return true;
@@ -124,4 +143,13 @@ bool eliminarAsignacion(const std::string& docenteId, const std::string& cursoCo
         }
     }
     return false;
+}
+
+bool reemplazarDocentesYAsignaciones(const std::vector<Docente>& docentes, const std::vector<Asignacion>& asignaciones) {
+    if (docentes.size() > static_cast<size_t>(MAX_REGISTROS) || asignaciones.size() > static_cast<size_t>(MAX_REGISTROS)) return false;
+    totalDocentes = 0;
+    for (const Docente& d : docentes) listaDocentes[totalDocentes++] = {d.id, d.nombre, d.especialidad, true};
+    totalAsignaciones = 0;
+    for (const Asignacion& a : asignaciones) listaAsignaciones[totalAsignaciones++] = {a.docenteId, a.cursoCodigo, true};
+    return true;
 }

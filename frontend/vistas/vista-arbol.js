@@ -4,7 +4,8 @@
    GET /api/arbol →
      { "raiz": { "nombre": "Universidad Mariano Gálvez", "tipo": "Universidad",
                  "hijos": [ { "nombre": "...", "tipo": "Facultad", "hijos": [ ... ] } ] },
-       "recorrido": ["Universidad Mariano Gálvez", "Facultad de Ingeniería", ...] }  // preorden hecho en C++
+       "recorrido": ["Universidad Mariano Gálvez", "Facultad de Ingeniería", ...],   // preorden hecho en C++
+       "recorridos": { "preorden": [...], "postorden": [...], "niveles": [...] } }
    Cada nodo: { nombre, tipo, hijos: [] }  (las hojas tienen hijos vacío)
    ===================================================================== */
 
@@ -13,6 +14,28 @@ const recorridoEl = document.getElementById("recorrido");
 const cifrasEl = document.getElementById("cifras");
 const leyendaEl = document.getElementById("leyenda-niveles");
 const btnRecorrer = document.getElementById("btn-recorrer");
+const selTipo = document.getElementById("tipo-recorrido");
+
+const RECORRIDOS = {
+  preorden: { titulo: "Recorrido en preorden", texto: "Primero se visita el nodo y luego, de izquierda a derecha, cada uno de sus hijos." },
+  postorden: { titulo: "Recorrido en postorden", texto: "Primero se visitan todos los hijos y al final el nodo: la raíz es la última." },
+  niveles: { titulo: "Recorrido por niveles", texto: "Se visita nivel por nivel con una cola (BFS): raíz, facultad, carrera, semestres y al final los cursos." },
+};
+
+// Nombres en el orden del recorrido elegido (el C++ los manda ya calculados).
+function nombresRecorrido() {
+  const tipo = selTipo.value;
+  return (datos.recorridos && datos.recorridos[tipo]) || datos.recorrido || nodosDibujados.map((p) => p.nodo.nombre);
+}
+
+selTipo.addEventListener("change", () => {
+  if (!datos || animando) return;
+  const info = RECORRIDOS[selTipo.value];
+  document.getElementById("titulo-recorrido").textContent = info.titulo;
+  document.getElementById("explicacion-recorrido").textContent = info.texto;
+  nodosDibujados.forEach((p) => p.el.classList.remove("visitado"));
+  dibujarRecorrido(nombresRecorrido());
+});
 
 // Medidas del dibujo
 const ANCHO_NODO = 180;
@@ -64,7 +87,7 @@ function recortar(texto, max = 24) {
 }
 
 function dibujar() {
-  const { raiz, recorrido } = datos;
+  const { raiz } = datos;
   if (!raiz) {
     lienzo.innerHTML = htmlVacio("El árbol está vacío.", " El servidor no devolvió una raíz.");
     return;
@@ -120,7 +143,7 @@ function dibujar() {
     <div class="cifra ok"><span class="cifra-texto">Hojas</span><span class="cifra-valor">${hojas}</span><span class="cifra-detalle">Nodos sin hijos (cursos)</span></div>
     <div class="cifra alerta"><span class="cifra-texto">Altura</span><span class="cifra-valor">${profundidad}</span><span class="cifra-detalle">Niveles debajo de la raíz</span></div>`;
 
-  dibujarRecorrido(recorrido || lista.map((p) => p.nodo.nombre));
+  dibujarRecorrido(nombresRecorrido());
 }
 
 function dibujarRecorrido(nombres) {
@@ -133,7 +156,8 @@ btnRecorrer.addEventListener("click", async () => {
   animando = true;
   btnRecorrer.disabled = true;
 
-  const nombres = datos.recorrido || nodosDibujados.map((p) => p.nodo.nombre);
+  const nombres = nombresRecorrido();
+  selTipo.disabled = true;
   const usados = new Set();
   nodosDibujados.forEach((p) => p.el.classList.remove("visitado"));
   recorridoEl.querySelectorAll("li").forEach((li) => li.classList.remove("actual"));
@@ -152,6 +176,7 @@ btnRecorrer.addEventListener("click", async () => {
 
   recorridoEl.querySelectorAll("li").forEach((li) => li.classList.remove("actual"));
   btnRecorrer.disabled = false;
+  selTipo.disabled = false;
   btnRecorrer.textContent = "Repetir recorrido";
   animando = false;
 });

@@ -55,8 +55,8 @@ const estilosTailwind = String.raw`
   :focus-visible { @apply outline-3 outline-offset-2 outline-amarillo; }
   ::selection { @apply bg-celeste text-marino; }
 
-  input, select { @apply w-full min-w-0 rounded-xl border-2 border-borde bg-white px-3.5 py-2.5 text-tinta transition-colors placeholder:text-tinta-suave/60 hover:border-borde-fuerte; }
-  input:focus, select:focus { @apply border-azul outline-none ring-4 ring-celeste/40; }
+  input, select, textarea { @apply w-full max-w-full min-w-0 rounded-xl border-2 border-borde bg-white px-3.5 py-2.5 text-tinta transition-colors placeholder:text-tinta-suave/60 hover:border-borde-fuerte; }
+  input:focus, select:focus, textarea:focus { @apply border-azul outline-none ring-4 ring-celeste/40; }
   select { @apply cursor-pointer appearance-none pr-10 font-medium; }
   input[aria-invalid="true"] { @apply border-naranja-700 bg-naranja-700/5 ring-naranja-700/15; }
 }
@@ -81,17 +81,17 @@ const estilosTailwind = String.raw`
   .estado-servidor { @apply flex items-center gap-2 rounded-xl bg-white/8 px-3 py-2.5 text-[0.82rem] text-celeste; }
   .estado-servidor::before { content: ""; @apply size-2.5 flex-none rounded-full bg-white/40; }
   .estado-servidor[data-estado="conectado"]::before { @apply bg-celeste shadow-[0_0_0_4px_rgb(142_223_252/0.25)]; }
-  .estado-servidor[data-estado="demo"]::before { @apply bg-amarillo shadow-[0_0_0_4px_rgb(247_168_39/0.25)]; }
+  .estado-servidor[data-estado="desconectado"]::before { @apply bg-amarillo shadow-[0_0_0_4px_rgb(247_168_39/0.25)]; }
 
   /* ---------- Paneles y tarjetas ---------- */
-  .panel { @apply min-w-0 rounded-2xl border border-borde/70 bg-white p-5 shadow-suave md:p-6; }
+  .panel { @apply min-w-0 rounded-2xl border border-borde/70 bg-white p-4 shadow-suave sm:p-5 md:p-6; }
   .panel-encabezado { @apply mb-4 flex flex-wrap items-center justify-between gap-3; }
   .panel-encabezado p { @apply text-sm text-tinta-suave; }
 
   /* Portada: tarjeta azul marino con la mancha celeste del logo */
   .pizarron { @apply relative isolate mb-8 overflow-hidden rounded-3xl bg-marino p-7 text-white shadow-alta md:p-10; }
   .pizarron::before { content: ""; @apply absolute -top-24 -right-20 -z-10 size-80 rounded-[58%_42%_55%_45%/50%_60%_40%_50%] bg-celeste/25; }
-  .pizarron::after { content: ""; @apply absolute right-10 bottom-8 -z-10 size-0 border-x-[22px] border-b-[38px] border-x-transparent border-b-amarillo opacity-90; }
+  .pizarron::after { content: ""; @apply absolute right-10 bottom-8 max-md:hidden -z-10 size-0 border-x-[22px] border-b-[38px] border-x-transparent border-b-amarillo opacity-90; }
   .pizarron h1 { @apply font-titulo text-[clamp(2rem,4.5vw,3rem)] font-extrabold text-white; }
   .pizarron b { @apply mx-0.5 font-titulo text-2xl leading-none font-extrabold text-amarillo; }
   .lema { @apply text-sm font-bold tracking-[0.25em] text-celeste uppercase; }
@@ -104,10 +104,10 @@ const estilosTailwind = String.raw`
   .lienzo { @apply overflow-auto rounded-2xl border border-borde bg-white; }
 
   /* ---------- Cifras resumen ---------- */
-  .cifra { @apply relative overflow-hidden rounded-2xl border border-borde/70 bg-white px-5 py-4 pl-6 shadow-suave; }
+  .cifra { @apply relative min-w-0 overflow-hidden rounded-2xl border border-borde/70 bg-white px-4 py-3.5 pl-5 shadow-suave sm:px-5 sm:py-4 sm:pl-6; }
   .cifra::before { content: ""; @apply absolute inset-y-0 left-0 w-1.5 bg-borde-fuerte; }
   .cifra-texto { @apply text-sm font-medium text-tinta-suave; }
-  .cifra-valor { @apply my-0.5 block font-titulo text-3xl leading-tight font-extrabold text-marino; }
+  .cifra-valor { @apply my-0.5 block font-titulo text-2xl sm:text-3xl leading-tight font-extrabold text-marino; }
   .cifra-detalle { @apply text-[0.85rem] text-tinta-suave; }
   .cifra.ok::before { @apply bg-azul; }
   .cifra.ok .cifra-valor { @apply text-azul-700; }
@@ -149,6 +149,7 @@ const estilosTailwind = String.raw`
   .dimension { @apply rounded-full bg-celeste-50 px-2.5 py-0.5 text-sm text-tinta-suave tabular-nums; }
   .adyacencia td.uno { @apply bg-azul font-bold text-white; }
   .adyacencia td.cero { @apply text-borde-fuerte; }
+  .matriz tr.fila-libre th, .matriz tr.fila-libre td { @apply bg-papel italic text-tinta-suave; }
 
   /* ---------- Notas por color ---------- */
   .nota-alta { @apply bg-celeste-100 text-marino; }
@@ -194,7 +195,6 @@ const estilosTailwind = String.raw`
   .vacio { @apply px-4 py-10 text-center text-tinta-suave; }
   .vacio strong { @apply mb-1 block font-titulo text-lg text-marino; }
   .cargando { @apply p-6 text-center text-tinta-suave; }
-  .aviso-demo { @apply mb-6 flex flex-wrap items-center gap-x-3 gap-y-1 rounded-2xl border border-amarillo/50 bg-amarillo/15 px-4 py-3 text-sm text-tinta [overflow-wrap:anywhere]; }
   .aviso-error { @apply rounded-2xl border border-naranja-700/30 bg-naranja-700/8 px-4 py-3 text-tinta; }
   .toasts { @apply fixed inset-auto right-4 bottom-4 m-0 grid max-w-[min(380px,calc(100vw-2rem))] gap-2 overflow-visible border-0 bg-transparent p-0; }
   .toast { @apply rounded-2xl border-l-[6px] border-celeste bg-marino px-4 py-3 text-white shadow-alta; }
@@ -213,6 +213,47 @@ const estilosTailwind = String.raw`
   .modal-cerrar svg { @apply block size-[18px] fill-none stroke-current; stroke-width: 2.2; stroke-linecap: round; }
   .modal-cuerpo { @apply grid gap-4 p-6; }
   .modal-botones { @apply mt-2 flex flex-wrap justify-end gap-2 border-t border-borde pt-4; }
+
+  /* ---------- Horarios ---------- */
+  .horario th, .horario td { @apply align-top; }
+  .horario th.hora { @apply w-20 bg-white text-sm font-bold text-marino; }
+  .celda-horario { @apply min-w-36 border-l border-borde/70 p-1.5; }
+  .celda-horario.editable { @apply cursor-pointer transition-colors hover:bg-celeste-50; }
+  .celda-horario.choque { @apply bg-naranja-700/8 outline-2 -outline-offset-2 outline-naranja-700/50; }
+  .bloque-curso { @apply mb-1 block rounded-lg border-l-4 px-2 py-1 text-xs leading-tight; }
+  .bloque-curso b { @apply block text-[0.8rem] text-marino; }
+  .bloque-curso small { @apply block truncate text-tinta-suave; }
+  .bloque-vacio { @apply block px-2 py-1 text-xs text-borde-fuerte; }
+  .sem-1 { @apply border-azul bg-celeste-100; }
+  .sem-2 { @apply border-amarillo bg-amarillo/20; }
+  .sem-3 { @apply border-marino bg-marino/10; }
+  .sem-4 { @apply border-naranja-700 bg-naranja-700/10; }
+  .leyenda i.sem-1, .leyenda i.sem-2, .leyenda i.sem-3, .leyenda i.sem-4 { @apply border-2; }
+  .fila-receso td { @apply bg-papel py-1.5 text-center text-xs font-bold tracking-wider text-tinta-suave uppercase; }
+  .periodo-movil { @apply flex min-w-0 items-start gap-3 rounded-xl border border-borde/70 bg-white p-2.5; }
+  .hora-movil { @apply w-14 flex-none text-sm font-bold text-marino; }
+  .hora-movil small { @apply block font-normal text-tinta-suave; }
+  .fila-receso-movil { @apply rounded-lg bg-papel py-1 text-center text-xs font-bold tracking-wider text-tinta-suave uppercase; }
+  .opcion-curso { @apply flex cursor-pointer items-center gap-2.5 rounded-xl border-2 border-borde px-3 py-2 text-sm hover:border-celeste has-checked:border-azul has-checked:bg-celeste-50 has-disabled:cursor-not-allowed has-disabled:opacity-50; }
+  .opcion-curso input { @apply size-4 w-auto flex-none accent-marino; }
+
+  /* ---------- Avisos ---------- */
+  .aviso-item { @apply flex flex-wrap items-start gap-4 rounded-2xl border border-borde/70 bg-white p-4 sm:flex-nowrap; }
+  .aviso-item.pronto { @apply border-amarillo bg-amarillo/5; }
+  .aviso-fecha { @apply grid w-16 flex-none place-items-center rounded-xl bg-marino py-2 text-white; }
+  .aviso-fecha b { @apply font-titulo text-2xl leading-none; }
+  .aviso-fecha span { @apply text-xs tracking-wider text-celeste uppercase; }
+  .aviso-item.pronto .aviso-fecha { @apply bg-amarillo text-marino; }
+  .aviso-item.pronto .aviso-fecha span { @apply text-marino; }
+
+  /* ---------- Álgebra lineal ---------- */
+  .indice-algebra { @apply flex flex-wrap gap-2; }
+  .indice-algebra a { @apply rounded-full border border-borde bg-white px-3.5 py-1.5 text-sm font-bold text-marino no-underline shadow-suave hover:border-celeste hover:bg-celeste-50; }
+  .formula { @apply mb-4 overflow-x-auto rounded-xl border-l-4 border-amarillo bg-celeste-50 px-4 py-3 font-titulo text-lg text-marino; }
+  .vector { @apply flex flex-wrap gap-1.5; }
+  .vector span { @apply grid min-w-14 place-items-center rounded-lg border border-borde bg-white px-2 py-1; }
+  .vector small { @apply text-[0.7rem] text-tinta-suave; }
+  .vector b { @apply font-titulo text-lg text-marino; }
 }
 `;
 

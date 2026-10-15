@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Horarios | CLARD Academy</title>
+  <link rel="icon" type="image/png" href="../img/icono.png">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.18"></script>
+  <script src="../js/tema.js"></script>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body data-pagina="horario" data-raiz="../">
+  <div class="min-h-screen md:grid md:grid-cols-[248px_1fr]">
+    <aside class="menu" id="menu"></aside>
+
+    <main class="contenido min-w-0 px-4 pt-8 pb-12 md:px-10">
+      <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1>Horarios</h1>
+          <p class="mt-1.5 max-w-[62ch] text-tinta-suave">El horario es una <b>matriz de 5 días × 6 periodos</b>. Haz clic en un bloque para cambiar sus cursos. El C++ marca un <b>choque</b> cuando un docente o un estudiante tiene dos cursos a la misma hora.</p>
+        </div>
+        <div class="campo w-full sm:w-auto sm:min-w-64">
+          <label for="filtro">Ver horario de</label>
+          <select id="filtro"><option value="">Todos los cursos</option></select>
+        </div>
+      </header>
+
+      <section class="mb-5 grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4" id="cifras" aria-label="Resumen del horario"></section>
+
+      <section class="panel" aria-labelledby="titulo-horario">
+        <div class="panel-encabezado">
+          <div>
+            <h2 id="titulo-horario">Horario semanal</h2>
+            <p id="ayuda-horario">Clic en un bloque para editarlo.</p>
+          </div>
+          <div class="leyenda" id="leyenda-semestres"></div>
+        </div>
+        <div id="tabla-horario"><div class="cargando">Cargando horario…</div></div>
+      </section>
+
+      <div class="mt-5 grid gap-5 lg:grid-cols-2">
+        <section class="panel" aria-labelledby="titulo-choques">
+          <div class="panel-encabezado">
+            <h2 id="titulo-choques">Choques de horario</h2>
+          </div>
+          <div id="lista-choques"><div class="cargando">Buscando choques…</div></div>
+        </section>
+        <section class="panel" aria-labelledby="titulo-carga">
+          <div class="panel-encabezado">
+            <div>
+              <h2 id="titulo-carga">Bloques por curso</h2>
+              <p>Bloques a la semana comparados con los créditos del curso.</p>
+            </div>
+          </div>
+          <div id="tabla-carga"><div class="cargando">Cargando…</div></div>
+        </section>
+      </div>
+
+      <dialog class="modal" id="modal-bloque" aria-labelledby="titulo-modal-bloque">
+        <div class="modal-encabezado">
+          <h2 id="titulo-modal-bloque">Editar bloque</h2>
+          <button class="modal-cerrar" type="button" data-cerrar aria-label="Cerrar"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+        </div>
+        <form class="modal-cuerpo" id="form-bloque" novalidate>
+          <p class="text-sm text-tinta-suave">Elige hasta 3 cursos para este bloque. Si un docente o un estudiante queda con dos cursos a la vez, se guarda igual pero se avisa del choque.</p>
+          <div class="grid gap-2 sm:grid-cols-2" id="opciones-bloque"></div>
+          <div class="modal-botones">
+            <button class="btn btn-secundario" type="button" data-cerrar>Cancelar</button>
+            <button class="btn btn-primario" type="submit">Guardar bloque</button>
+          </div>
+        </form>
+      </dialog>
+    </main>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="vista-horario.js"></script>
+</body>
+</html>

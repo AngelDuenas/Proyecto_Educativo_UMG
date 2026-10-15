@@ -4,6 +4,7 @@
 #include "asistencia.hpp"
 
 #include <algorithm>
+#include <iostream>
 #include <mutex>
 #include <string>
 
@@ -76,6 +77,8 @@ void registrar_rutas_asistencia(httplib::Server& svr, Estado& estado) {
             return;
         }
         estado.asistencia[fila][dia] = valor;
+        std::cout << "[matriz] asistencia[" << fila << "][" << dia << "] = " << valor
+                  << "   (" << carnet << (valor ? ", presente" : ", ausente") << ")" << std::endl;
 
         json datos = json::object();
         datos["carnet"] = carnet;

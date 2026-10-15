@@ -3,7 +3,7 @@
    ---------------------------------------------------------------------
    - Dibuja el menú lateral (no hay que copiarlo en cada HTML).
    - Marca la página actual según <body data-pagina="...">.
-   - Muestra el aviso de "modo demo" y el estado del servidor.
+   - Muestra el estado del servidor.
    - Helpers: toast(), confirmar(), esc(), claseNota(), formatear()...
 
    Cada HTML solo necesita:
@@ -29,6 +29,11 @@ const ICONOS = {
   reportes: '<path d="M4 17V9M10 17V4M16 17v-6"/>',
   arbol: '<rect x="7.5" y="2" width="5" height="4" rx="1"/><rect x="2" y="14" width="5" height="4" rx="1"/><rect x="13" y="14" width="5" height="4" rx="1"/><path d="M10 6v4M4.5 14v-4h11v4"/>',
   grafo: '<circle cx="4.5" cy="5" r="2"/><circle cx="15.5" cy="5" r="2"/><circle cx="10" cy="15" r="2"/><path d="M6.5 5h7M5.5 6.8l3.5 6.4M14.5 6.8L11 13.2"/>',
+  inscripciones: '<path d="M5 3h7l3 3v11H5z"/><path d="M12 3v3h3M8 11l1.5 1.5L12.5 9"/>',
+  horario: '<circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 2.5"/>',
+  avisos: '<path d="M4 8v4h3l5 4V4L7 8z"/><path d="M15 7.5a3.5 3.5 0 010 5"/>',
+  algebra: '<path d="M6 3H4v14h2M14 3h2v14h-2"/><path d="M8 7.5h4M8 12.5h4"/>',
+  memoria: '<rect x="4" y="4" width="12" height="12" rx="1"/><path d="M8 8h4v4H8zM7 1.5V4M13 1.5V4M7 16v2.5M13 16v2.5M1.5 7H4M1.5 13H4M16 7h2.5M16 13h2.5"/>',
 };
 
 const MENU = [
@@ -38,6 +43,9 @@ const MENU = [
     items: [
       { id: "estudiantes", texto: "Estudiantes", href: "vistas/vista-estudiantes.html" },
       { id: "docentes", texto: "Docentes y cursos", href: "vistas/vista-docentes-cursos.html" },
+      { id: "inscripciones", texto: "Inscripciones", href: "vistas/vista-inscripciones.html" },
+      { id: "horario", texto: "Horarios", href: "vistas/vista-horario.html" },
+      { id: "avisos", texto: "Avisos y calendario", href: "vistas/vista-avisos.html" },
     ],
   },
   {
@@ -49,10 +57,13 @@ const MENU = [
     ],
   },
   {
-    grupo: "Plan de estudios",
+    // Vistas de muestra: explican cómo aplicamos los temas de los cursos de la universidad.
+    grupo: "Temas aplicados",
     items: [
       { id: "arbol", texto: "Estructura académica", href: "vistas/vista-arbol.html" },
       { id: "grafo", texto: "Prerrequisitos", href: "vistas/vista-grafo.html" },
+      { id: "algebra", texto: "Álgebra lineal", href: "vistas/vista-algebra.html" },
+      { id: "memoria", texto: "Matrices en memoria", href: "vistas/vista-memoria.html" },
     ],
   },
 ];
@@ -105,7 +116,7 @@ function actualizarEstado(estado) {
   const marca = document.querySelector(".estado-servidor");
   if (marca) {
     marca.dataset.estado = estado;
-    marca.textContent = estado === "conectado" ? "Servidor C++ conectado" : "Sin servidor: datos de ejemplo";
+    marca.textContent = estado === "conectado" ? "Servidor C++ conectado" : "Servidor desconectado";
   }
 }
 
@@ -255,6 +266,37 @@ document.querySelectorAll("dialog.modal").forEach((modal) =>
     form.querySelectorAll("[aria-invalid]").forEach((c) => c.removeAttribute("aria-invalid"));
   })
 );
+
+/* ---------- Tablas en celular ---------- */
+// En pantallas chicas cada fila de una tabla se muestra como tarjeta (ver estilos.css).
+// Aquí se copia el nombre de cada columna a sus celdas (data-label) para poder mostrarlo.
+// Las matrices (.matriz) y el horario no se tocan: esas se desplazan hacia los lados.
+function prepararTablas() {
+  document.querySelectorAll("table.tabla:not(.matriz):not(.horario)").forEach((tabla) => {
+    const titulos = [...tabla.querySelectorAll("thead th")].map((th) =>
+      th.querySelector(".solo-lector") ? "" : th.textContent.trim()
+    );
+    tabla.classList.add("tabla-movil");
+    // En los rankings la 1.ª columna es el puesto: el título de la tarjeta pasa a ser la 2.ª
+    tabla.classList.toggle("tabla-ranking", titulos[0] === "Puesto");
+    tabla.querySelectorAll("tbody tr").forEach((tr) =>
+      [...tr.children].forEach((td, i) => {
+        if (!td.hasAttribute("data-label")) td.setAttribute("data-label", titulos[i] || "");
+      })
+    );
+  });
+}
+
+// Las vistas redibujan sus tablas con innerHTML: se vuelven a preparar en el siguiente cuadro.
+let tablasPendientes = false;
+new MutationObserver(() => {
+  if (tablasPendientes) return;
+  tablasPendientes = true;
+  requestAnimationFrame(() => {
+    tablasPendientes = false;
+    prepararTablas();
+  });
+}).observe(document.body, { childList: true, subtree: true });
 
 /* ---------- Arranque ---------- */
 dibujarMenu();

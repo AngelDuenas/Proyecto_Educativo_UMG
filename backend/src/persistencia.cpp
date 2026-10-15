@@ -4,9 +4,17 @@
 //   cursos.json      -> [ {codigo, nombre, creditos, semestre}, ... ]
 //   notas.json       -> { "0901-26-1001": { "MAT101": 85, "PRG101": 90 }, ... }   (solo las notas que existen)
 //   asistencia.json  -> { "0901-26-1001": [1,1,0,1,1], ... }
-// cargar_todo() solo reemplaza los datos si LOS CUATRO archivos existen y son válidos;
-// si no, deja intactos los datos que ya están en memoria (los de ejemplo).
-// TODO(P2, T24): copias de seguridad en data/backup/ y guardado de los prerrequisitos (grafo.json).
+//   docentes.json    -> [ {id, nombre, especialidad}, ... ]
+//   asignaciones.json-> [ {docenteId, cursoCodigo}, ... ]
+//   asignaciones_estudiantes.json -> [ {carnet, curso}, ... ]   (inscripciones)
+//   horario.json     -> { "celdas": [ [ ["MAT101"], ... 6 periodos ], ... 5 días ] }
+//   avisos.json      -> [ {id, titulo, descripcion, fecha, tipo, curso}, ... ]
+// cargar_todo() solo reemplaza los datos si LOS CUATRO primeros archivos existen y son válidos;
+// si no, deja intactos los datos que ya están en memoria (los de ejemplo). Los otros son
+// opcionales: si faltan o están dañados se usan los de ejemplo solo para esa parte.
+// El árbol y el grafo son de MUESTRA: se arman con los cursos y los prerrequisitos del plan, no se guardan.
+// main.cpp llama a guardar_todo() después de cada cambio exitoso (guardado automático).
+// TODO(P2, T24): copias de seguridad en data/backup/.
 #include "persistencia.hpp"
 
 #include <algorithm>
@@ -20,7 +28,12 @@
 #include <vector>
 
 #include "algoritmos.hpp"
+#include "avisos.hpp"
+#include "horario.hpp"
+#include "inscripciones.hpp"
+#include "docentes.hpp"
 #include "respuestas.hpp"
+#include "rutas_catalogo.hpp"
 
 namespace {
 
@@ -44,6 +57,37 @@ bool escribir_archivo(const std::string& ruta, const json& contenido) {
     archivo << contenido.dump(2, ' ', false, json::error_handler_t::replace) << "\n";
     return archivo.good();
 }
+
+// Los ids de docentes son "D01", "D02"...; si el archivo trae números (1, 2...) se convierten.
+std::string id_docente(const json& valor) {
+    if (valor.is_string()) return valor.get<std::string>();
+    if (valor.is_number_integer()) {
+        const std::string n = std::to_string(valor.get<long long>());
+        return "D" + (n.size() < 2 ? "0" + n : n);
+    }
+    throw std::runtime_error("id de docente inválido");
+}
+
+// Lee docentes.json y asignaciones.json. Devuelve false si docentes.json no existe o no sirve.
+// `hay_asignaciones` queda en false si asignaciones.json falta o está vacío.
+bool leer_docentes(const std::string& dir, std::vector<Docente>& docentes, std::vector<Asignacion>& asignaciones,
+                   bool& hay_asignaciones) {
+    json j_doc, j_asg;
+    if (leer_archivo(dir + "/docentes.json", j_doc) != Lectura::OK || !j_doc.is_array()) return false;
+    try {
+        for (const json& d : j_doc)
+            docentes.push_back({id_docente(d.at("id")), d.at("nombre").get<std::string>(), d.value("especialidad", std::string()), true});
+        hay_asignaciones = leer_archivo(dir + "/asignaciones.json", j_asg) == Lectura::OK && j_asg.is_array();
+        if (hay_asignaciones)
+            for (const json& a : j_asg)
+                asignaciones.push_back({id_docente(a.at("docenteId")), a.at("cursoCodigo").get<std::string>(), true});
+    } catch (const std::exception& ex) {
+        std::cerr << "[persistencia] docentes.json o asignaciones.json con formato inesperado: " << ex.what() << std::endl;
+        return false;
+    }
+    return true;
+}
+
 
 }  // namespace
 
@@ -84,6 +128,19 @@ bool guardar_todo(Estado& e, const std::string& dir) {
     todo_bien = escribir_archivo(dir + "/cursos.json", cursos) && todo_bien;
     todo_bien = escribir_archivo(dir + "/notas.json", notas) && todo_bien;
     todo_bien = escribir_archivo(dir + "/asistencia.json", asistencia) && todo_bien;
+    todo_bien = escribir_archivo(dir + "/asignaciones_estudiantes.json", inscripciones_a_json(e)) && todo_bien;
+    todo_bien = escribir_archivo(dir + "/horario.json", horario_a_json(e)) && todo_bien;
+    todo_bien = escribir_archivo(dir + "/avisos.json", avisos_a_json(e)) && todo_bien;
+
+
+    // Docentes y asignaciones viven en el módulo de Cristian (con su propio candado).
+    {
+        std::lock_guard<std::mutex> candado(candado_docentes());
+        json docentes = json::parse(obtenerDocentesJSON(), nullptr, false);
+        json asignaciones = json::parse(obtenerAsignacionesJSON(), nullptr, false);
+        if (docentes.is_array()) todo_bien = escribir_archivo(dir + "/docentes.json", docentes) && todo_bien;
+        if (asignaciones.is_array()) todo_bien = escribir_archivo(dir + "/asignaciones.json", asignaciones) && todo_bien;
+    }
     return todo_bien;
 }
 
@@ -158,7 +215,35 @@ bool cargar_todo(Estado& e, const std::string& dir) {
         if (fa != asistencia.end())
             for (size_t d = 0; d < fa->second.size() && d < static_cast<size_t>(DIAS_SEMANA); ++d) e.asistencia[i][d] = fa->second[d];
     }
-    reconstruir_adyacencia(e);   // los prerrequisitos de ejemplo se acomodan a los cursos cargados
+    reconstruir_adyacencia(e);   // los prerrequisitos del plan se acomodan a los cursos cargados
+
+    // Módulos extra: si su archivo falta o no sirve, se conservan los de ejemplo, pero filtrados
+    // a los estudiantes y cursos que se acaban de cargar (para no apuntar a datos que no existen).
+    json j_extra;
+    if (leer_archivo(dir + "/asignaciones_estudiantes.json", j_extra) != Lectura::OK || !inscripciones_desde_json(j_extra, e))
+        inscripciones_desde_json(inscripciones_a_json(e), e);
+    if (leer_archivo(dir + "/horario.json", j_extra) != Lectura::OK || !horario_desde_json(j_extra, e))
+        horario_desde_json(horario_a_json(e), e);
+    if (leer_archivo(dir + "/avisos.json", j_extra) != Lectura::OK || !avisos_desde_json(j_extra, e))
+        avisos_desde_json(avisos_a_json(e), e);
+
+    std::vector<Docente> docentes;
+    std::vector<Asignacion> asignaciones;
+    bool hay_asignaciones = false;
+    if (leer_docentes(dir, docentes, asignaciones, hay_asignaciones)) {
+        std::lock_guard<std::mutex> candado(candado_docentes());
+        if (!hay_asignaciones) {
+            // Sin asignaciones.json se conservan las de ejemplo, solo las de docentes que siguen existiendo.
+            json actuales = json::parse(obtenerAsignacionesJSON(), nullptr, false);
+            if (actuales.is_array())
+                for (const json& a : actuales)
+                    for (const Docente& d : docentes)
+                        if (a.value("docenteId", std::string()) == d.id)
+                            asignaciones.push_back({d.id, a.value("cursoCodigo", std::string()), true});
+        }
+        if (!reemplazarDocentesYAsignaciones(docentes, asignaciones))
+            std::cerr << "[persistencia] Demasiados docentes o asignaciones en data/; se dejan los de ejemplo." << std::endl;
+    }
     return true;
 }
 

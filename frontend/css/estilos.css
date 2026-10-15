@@ -87,9 +87,64 @@ dialog[open] { animation: aparecer 0.2s ease-out; }
   *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
 }
 
+/* ---------- Tablas como tarjetas en celular (app.js pone data-label) ---------- */
+@media (max-width: 639px) {
+  .tabla-movil thead { display: none; }
+  .tabla-movil, .tabla-movil tbody, .tabla-movil tr, .tabla-movil td { display: block; width: 100%; }
+  .tabla-movil tbody tr { padding: 0.85rem 1rem; border-bottom: 1px solid var(--color-borde); }
+  .tabla-movil tbody tr:last-child { border-bottom: 0; }
+  .tabla-movil td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.3rem 0;
+    border: 0;
+    text-align: right;
+    white-space: normal;
+  }
+  .tabla-movil td::before {
+    content: attr(data-label);
+    flex: none;
+    max-width: 45%;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-tinta-suave);
+  }
+  .tabla-movil td[data-label=""]::before { display: none; }
+  /* La primera columna (nombre, curso…) es el título de la tarjeta */
+  .tabla-movil td:first-child { display: block; padding-top: 0; text-align: left; font-weight: 700; color: var(--color-marino); }
+  .tabla-movil td:first-child::before { display: none; }
+  .tabla-movil td:first-child .sub { font-weight: 400; }
+  .tabla-movil td.acciones-fila { justify-content: flex-end; padding-top: 0.6rem; }
+  /* Celda con texto + subtítulo (nombre y carnet, curso y nombre): etiqueta arriba y valor abajo */
+  .tabla-movil td:has(.sub):not(:first-child) { display: block; text-align: left; }
+  .tabla-movil td:has(.sub):not(:first-child)::before { display: block; max-width: none; margin-bottom: 0.15rem; }
+  /* Rankings: el puesto es una insignia y el estudiante el título */
+  .tabla-ranking td:first-child {
+    display: inline-grid; place-items: center; width: auto; min-width: 2rem; height: 2rem;
+    margin-bottom: 0.35rem; padding: 0 0.5rem; border-radius: 999px;
+    background: var(--color-marino); color: #fff; font-size: 0.85rem;
+  }
+  .tabla-ranking td:nth-child(2) { display: block; text-align: left; font-weight: 700; color: var(--color-marino); }
+  .tabla-ranking td:nth-child(2)::before { display: none !important; }
+  .tabla-movil td.acciones-fila:empty { display: none; }
+  .tabla-movil .barra { min-width: 0; flex: 1; max-width: 60%; }
+}
+
+/* ---------- Matrices en memoria: celda que acaba de cambiar ---------- */
+@keyframes destello {
+  from { background-color: var(--color-amarillo); color: var(--color-marino); box-shadow: inset 0 0 0 2px var(--color-naranja); }
+}
+.matriz td.cambio { animation: destello 2.5s ease-out; font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { .matriz td.cambio { animation: none; outline: 2px solid var(--color-naranja); } }
+
 /* ---------- Impresión (botón "Imprimir reporte") ---------- */
 @media print {
-  .menu, .aviso-demo, .toasts, header .btn, select { display: none !important; }
+  .menu, .toasts, header .btn, select { display: none !important; }
   .contenido { background: none; padding: 0; }
   .panel { box-shadow: none; break-inside: avoid; }
 }

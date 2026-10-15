@@ -23,6 +23,14 @@
         </div>
       </section>
 
+      <section class="panel" aria-labelledby="titulo-proximos">
+        <div class="panel-encabezado">
+          <h2 id="titulo-proximos">Próximas fechas</h2>
+          <a class="btn btn-secundario btn-chico" href="vistas/vista-avisos.html">Ver calendario</a>
+        </div>
+        <ol class="grid gap-3" id="proximos"><li class="cargando">Cargando avisos…</li></ol>
+      </section>
+
       <h2 class="mt-9 mb-4">Gestión</h2>
       <div class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4">
         <a class="modulo" href="vistas/vista-estudiantes.html">
@@ -32,6 +40,18 @@
         <a class="modulo" href="vistas/vista-docentes-cursos.html">
           <strong>Docentes y cursos</strong>
           <span>Da de alta docentes y cursos, y asigna quién imparte cada curso.</span>
+        </a>
+        <a class="modulo" href="vistas/vista-inscripciones.html">
+          <strong>Inscripciones</strong>
+          <span>Inscribe estudiantes en cursos, validando los prerrequisitos con el grafo.</span>
+        </a>
+        <a class="modulo" href="vistas/vista-horario.html">
+          <strong>Horarios</strong>
+          <span>Matriz de días y periodos con los cursos de cada bloque y sus choques.</span>
+        </a>
+        <a class="modulo" href="vistas/vista-avisos.html">
+          <strong>Avisos y calendario</strong>
+          <span>Exámenes, entregas y eventos del semestre, ordenados por fecha.</span>
         </a>
       </div>
 
@@ -51,7 +71,8 @@
         </a>
       </div>
 
-      <h2 class="mt-9 mb-4">Plan de estudios</h2>
+      <h2 class="mt-9 mb-1">Temas aplicados</h2>
+      <p class="mb-4 text-tinta-suave">Vistas de muestra: cómo aplicamos en el sistema los temas de los cursos de la universidad.</p>
       <div class="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-4">
         <a class="modulo" href="vistas/vista-arbol.html">
           <strong>Estructura académica</strong>
@@ -60,6 +81,10 @@
         <a class="modulo" href="vistas/vista-grafo.html">
           <strong>Prerrequisitos</strong>
           <span>Grafo de cursos con matriz de adyacencia y recorridos BFS y DFS.</span>
+        </a>
+        <a class="modulo" href="vistas/vista-algebra.html">
+          <strong>Álgebra lineal</strong>
+          <span>Transpuesta, producto matriz por vector, combinación lineal y M² con los datos reales.</span>
         </a>
       </div>
     </main>
@@ -93,6 +118,33 @@
         : "<p>No se pudo leer ningún módulo. Revisa que el servidor C++ esté corriendo.</p>";
     }
     cargarResumen();
+
+    // Las 3 fechas más cercanas desde hoy (módulo Avisos)
+    async function cargarProximos() {
+      const el = document.getElementById("proximos");
+      const meses = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"];
+      const tipos = { examen: ["Examen", "mal"], entrega: ["Entrega", "alerta"], evento: ["Evento", "ok"], aviso: ["Aviso", "info"] };
+      const h = new Date();
+      const hoy = `${h.getFullYear()}-${String(h.getMonth() + 1).padStart(2, "0")}-${String(h.getDate()).padStart(2, "0")}`;
+      try {
+        const proximos = (await api("/avisos")).filter((a) => a.fecha >= hoy).slice(0, 3);
+        el.innerHTML = proximos.length
+          ? proximos
+              .map((a) => {
+                const [, m, d] = a.fecha.split("-");
+                const [texto, clase] = tipos[a.tipo] || [a.tipo, ""];
+                return `<li class="aviso-item"><div class="aviso-fecha"><b>${Number(d)}</b><span>${meses[Number(m) - 1]}</span></div>
+                  <div class="min-w-0 flex-1"><span class="etiqueta ${clase}">${texto}</span>
+                  <strong class="mt-1 block font-titulo text-lg text-marino">${esc(a.titulo)}</strong>
+                  ${a.cursoNombre ? `<p class="text-sm text-tinta-suave">${esc(a.cursoNombre)}</p>` : ""}</div></li>`;
+              })
+              .join("")
+          : `<li>${htmlVacio("No hay fechas próximas.", "")}</li>`;
+      } catch (e) {
+        el.innerHTML = `<li>${htmlError("No se pudieron leer los avisos.")}</li>`;
+      }
+    }
+    cargarProximos();
   </script>
 </body>
 </html>
