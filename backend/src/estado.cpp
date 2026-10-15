@@ -122,6 +122,9 @@ Resultado quitar_estudiante(Estado& e, const std::string& carnet) {
     }
     limpiar_fila(e, total - 1);
     e.estudiantes.erase(e.estudiantes.begin() + static_cast<std::ptrdiff_t>(idx));
+    e.inscripciones.erase(std::remove_if(e.inscripciones.begin(), e.inscripciones.end(),
+                                         [&carnet](const Inscripcion& x) { return x.carnet == carnet; }),
+                          e.inscripciones.end());
     return Resultado::OK;
 }
 
@@ -153,6 +156,16 @@ Resultado quitar_curso(Estado& e, const std::string& codigo) {
     for (int k = 0; k < MAX_CURSOS; ++k) { e.adyacencia[total - 1][k] = 0; e.adyacencia[k][total - 1] = 0; }
 
     e.cursos.erase(e.cursos.begin() + static_cast<std::ptrdiff_t>(idx));
+
+    // El curso deja de existir también en los módulos que lo mencionan por código.
+    e.inscripciones.erase(std::remove_if(e.inscripciones.begin(), e.inscripciones.end(),
+                                         [&codigo](const Inscripcion& x) { return x.curso == codigo; }),
+                          e.inscripciones.end());
+    for (auto& dia : e.horario)
+        for (std::vector<std::string>& bloque : dia)
+            bloque.erase(std::remove(bloque.begin(), bloque.end(), codigo), bloque.end());
+    for (Aviso& a : e.avisos)
+        if (a.curso == codigo) a.curso.clear();
     return Resultado::OK;
 }
 

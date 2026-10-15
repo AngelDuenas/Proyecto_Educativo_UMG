@@ -5,6 +5,7 @@
 #include "notas.hpp"
 
 #include <algorithm>
+#include <iostream>
 #include <mutex>
 #include <string>
 
@@ -113,6 +114,8 @@ void registrar_rutas_notas(httplib::Server& svr, Estado& estado) {
             return;
         }
         estado.notas[fila][col] = nota;
+        std::cout << "[matriz] notas[" << fila << "][" << col << "] = " << nota
+                  << "   (" << carnet << ", " << curso << (nota < 0.0f ? ", sin nota" : "") << ")" << std::endl;
 
         json datos = json::object();
         datos["carnet"] = carnet;

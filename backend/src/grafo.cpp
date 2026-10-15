@@ -2,13 +2,49 @@
 //   GET /api/grafo                      -> {nodos:[{codigo,nombre}], matriz:[[0,1,...]]}
 //   GET /api/grafo/bfs?origen=MAT101    -> {origen, orden:["MAT101","MAT102",...]}
 //   GET /api/grafo/dfs?origen=MAT101    -> igual, en profundidad
+//   GET /api/grafo/ruta?desde=MAT101&hasta=ALG201 -> {existe, ruta:["MAT101","MAT102","ALG201"]}
+// Es una vista de MUESTRA (solo lectura): los prerrequisitos son los del plan de estudios.
 #include "grafo.hpp"
 
 #include <algorithm>
 #include <mutex>
+#include <queue>
 
 #include "algoritmos.hpp"
 #include "respuestas.hpp"
+
+namespace {
+
+size_t total_vertices(const Estado& e) { return std::min(e.cursos.size(), static_cast<size_t>(MAX_CURSOS)); }
+
+// Camino más corto (en número de aristas) de `desde` a `hasta` con BFS, guardando el padre de cada vértice.
+std::vector<int> buscar_ruta(const Estado& e, int desde, int hasta) {
+    const size_t n = total_vertices(e);
+    std::vector<int> padre(n, -1);
+    std::vector<bool> visitado(n, false);
+    std::queue<int> cola;
+    cola.push(desde);
+    visitado[static_cast<size_t>(desde)] = true;
+    while (!cola.empty()) {
+        const int actual = cola.front();
+        cola.pop();
+        if (actual == hasta) break;
+        for (size_t j = 0; j < n; ++j) {
+            if (e.adyacencia[actual][j] == 1 && !visitado[j]) {
+                visitado[j] = true;
+                padre[j] = actual;
+                cola.push(static_cast<int>(j));
+            }
+        }
+    }
+    std::vector<int> ruta;
+    if (!visitado[static_cast<size_t>(hasta)]) return ruta;   // no hay camino
+    for (int v = hasta; v != -1; v = padre[static_cast<size_t>(v)]) ruta.push_back(v);
+    std::reverse(ruta.begin(), ruta.end());
+    return ruta;
+}
+
+}  // namespace
 
 void registrar_rutas_grafo(httplib::Server& svr, Estado& estado) {
     svr.Get("/api/grafo", [&estado](const httplib::Request&, httplib::Response& res) {
@@ -49,6 +85,26 @@ void registrar_rutas_grafo(httplib::Server& svr, Estado& estado) {
         json datos = json::object();
         datos["origen"] = origen;
         datos["orden"] = orden;
+        responder_json(res, datos);
+    });
+
+    svr.Get("/api/grafo/ruta", [&estado](const httplib::Request& req, httplib::Response& res) {
+        const std::string desde = req.get_param_value("desde");
+        const std::string hasta = req.get_param_value("hasta");
+        std::lock_guard<std::mutex> candado(estado.mtx);
+        const int i = indice_curso(estado, desde);
+        const int j = indice_curso(estado, hasta);
+        if (i < 0 || j < 0) {
+            responder_error(res, "No existe el curso " + (i < 0 ? desde : hasta) + ".", 404);
+            return;
+        }
+        json ruta = json::array();
+        for (int v : buscar_ruta(estado, i, j)) ruta.push_back(estado.cursos[static_cast<size_t>(v)].codigo);
+        json datos = json::object();
+        datos["desde"] = desde;
+        datos["hasta"] = hasta;
+        datos["existe"] = !ruta.empty();
+        datos["ruta"] = ruta;
         responder_json(res, datos);
     });
 }

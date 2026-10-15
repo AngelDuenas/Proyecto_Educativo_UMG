@@ -1,0 +1,50 @@
+[
+  {
+    "curso": "",
+    "descripcion": "Bienvenida en el auditorio principal.",
+    "fecha": "2026-07-13",
+    "id": 1,
+    "tipo": "evento",
+    "titulo": "Inicio del segundo semestre"
+  },
+  {
+    "curso": "MAT101",
+    "descripcion": "Temas 1 a 4. Traer calculadora.",
+    "fecha": "2026-10-20",
+    "id": 2,
+    "tipo": "examen",
+    "titulo": "Primer parcial de Matemática I"
+  },
+  {
+    "curso": "PRG102",
+    "descripcion": "Subir el repositorio con el informe en PDF.",
+    "fecha": "2026-10-23",
+    "id": 3,
+    "tipo": "entrega",
+    "titulo": "Entrega del proyecto de Programación I"
+  },
+  {
+    "curso": "",
+    "descripcion": "Presentación de proyectos de todos los semestres.",
+    "fecha": "2026-10-30",
+    "id": 4,
+    "tipo": "evento",
+    "titulo": "Feria de Ingeniería"
+  },
+  {
+    "curso": "ALG201",
+    "descripcion": "Incluye matrices, determinantes y sistemas de ecuaciones.",
+    "fecha": "2026-11-06",
+    "id": 5,
+    "tipo": "examen",
+    "titulo": "Examen final de Álgebra Lineal"
+  },
+  {
+    "curso": "",
+    "descripcion": "Último día para revisar notas con los docentes.",
+    "fecha": "2026-11-13",
+    "id": 6,
+    "tipo": "aviso",
+    "titulo": "Cierre de notas del semestre"
+  }
+]

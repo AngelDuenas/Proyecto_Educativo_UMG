@@ -17,12 +17,20 @@
       <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1>Estructura académica</h1>
-          <p class="mt-1.5 max-w-[62ch] text-tinta-suave">Árbol de la universidad: cada nodo tiene hijos, desde la raíz hasta los cursos, que son las hojas.</p>
+          <p class="mt-1.5 max-w-[62ch] text-tinta-suave">Vista de muestra del tema <b>árboles</b>: la universidad es la raíz y los cursos son las hojas. El C++ arma el árbol con los cursos reales y calcula tres recorridos.</p>
         </div>
-        <button class="btn btn-primario" type="button" id="btn-recorrer">Recorrer en preorden</button>
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="sr-only" for="tipo-recorrido">Tipo de recorrido</label>
+          <select class="w-auto" id="tipo-recorrido">
+            <option value="preorden">Preorden</option>
+            <option value="postorden">Postorden</option>
+            <option value="niveles">Por niveles</option>
+          </select>
+          <button class="btn btn-primario" type="button" id="btn-recorrer">Animar recorrido</button>
+        </div>
       </header>
 
-      <section class="mb-5 grid grid-cols-[repeat(auto-fit,minmax(190px,1fr))] gap-4" id="cifras" aria-label="Datos del árbol"></section>
+      <section class="mb-5 grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4" id="cifras" aria-label="Datos del árbol"></section>
 
       <section class="panel" aria-labelledby="titulo-arbol">
         <div class="panel-encabezado">
@@ -30,13 +38,14 @@
           <div class="leyenda" id="leyenda-niveles"></div>
         </div>
         <div class="lienzo" id="lienzo-arbol"><div class="cargando">Cargando árbol…</div></div>
+        <p class="mt-2 text-xs text-tinta-suave md:hidden">Desliza hacia los lados para ver todo el árbol.</p>
       </section>
 
       <section class="panel mt-5" aria-labelledby="titulo-recorrido">
         <div class="panel-encabezado">
           <div>
             <h2 id="titulo-recorrido">Recorrido en preorden</h2>
-            <p>Primero se visita el nodo y luego, de izquierda a derecha, cada uno de sus hijos.</p>
+            <p id="explicacion-recorrido">Primero se visita el nodo y luego, de izquierda a derecha, cada uno de sus hijos.</p>
           </div>
         </div>
         <ol class="recorrido-lista" id="recorrido"></ol>

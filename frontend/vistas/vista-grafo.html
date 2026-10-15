@@ -24,14 +24,15 @@
       <section class="panel" aria-labelledby="titulo-grafo">
         <div class="panel-encabezado">
           <h2 id="titulo-grafo">Grafo de cursos</h2>
-          <div class="flex flex-wrap items-center gap-2">
+          <div class="flex w-full flex-wrap items-center gap-2 lg:w-auto">
             <label class="sr-only" for="origen">Curso de origen</label>
-            <select class="w-auto" id="origen"></select>
+            <select class="w-full sm:w-auto" id="origen"></select>
             <button class="btn btn-primario" type="button" data-recorrido="bfs">Recorrer en anchura (BFS)</button>
             <button class="btn btn-secundario" type="button" data-recorrido="dfs">Recorrer en profundidad (DFS)</button>
           </div>
         </div>
         <div class="lienzo" id="lienzo-grafo"><div class="cargando">Cargando grafo…</div></div>
+        <p class="mt-2 text-xs text-tinta-suave md:hidden">Desliza hacia los lados para ver todo el grafo.</p>
         <div class="mt-4" id="resultado" aria-live="polite">
           <p class="dimension">Elige un curso de origen y un tipo de recorrido.</p>
         </div>

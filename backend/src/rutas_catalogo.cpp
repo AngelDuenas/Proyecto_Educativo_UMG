@@ -1,7 +1,6 @@
 // DUEÑO: P1 (conecta el código de Cristian con el servidor HTTP)
 //   GET/POST/DELETE /api/docentes        -> docentes.cpp de Cristian
 //   GET/POST/DELETE /api/asignaciones    -> docentes.cpp de Cristian
-//   GET             /api/arbol           -> arbol.cpp de Cristian
 //   GET/POST/DELETE /api/cursos          -> catálogo en Estado (así las notas y el grafo siempre
 //                                           usan los mismos cursos que ve la pantalla de Docentes y Cursos)
 #include "rutas_catalogo.hpp"
@@ -9,13 +8,15 @@
 #include <mutex>
 #include <string>
 
-#include "arbol.hpp"
 #include "docentes.hpp"
 #include "respuestas.hpp"
 
-namespace {
+std::mutex& candado_docentes() {
+    static std::mutex mtx;   // el módulo de Cristian no es seguro entre hilos: se protege aquí
+    return mtx;
+}
 
-std::mutex mtx_docentes;   // el módulo de Cristian no es seguro entre hilos: se protege aquí
+namespace {
 
 json ok_simple() {
     json ok = json::object();
@@ -80,7 +81,7 @@ void quitar_asignaciones(const std::string& docente_id, const std::string& curso
 void registrar_rutas_catalogo(httplib::Server& svr, Estado& estado) {
     // ---------- Docentes ----------
     svr.Get("/api/docentes", [](const httplib::Request&, httplib::Response& res) {
-        std::lock_guard<std::mutex> candado(mtx_docentes);
+        std::lock_guard<std::mutex> candado(candado_docentes());
         responder_json_texto(res, obtenerDocentesJSON());
     });
 
@@ -93,7 +94,7 @@ void registrar_rutas_catalogo(httplib::Server& svr, Estado& estado) {
             return;
         }
         leer_texto(cuerpo, "especialidad", especialidad);
-        std::lock_guard<std::mutex> candado(mtx_docentes);
+        std::lock_guard<std::mutex> candado(candado_docentes());
         if (!crearDocente(nombre, especialidad)) {
             responder_error(res, "No se pudo registrar al docente (se alcanzó el límite).", 400);
             return;
@@ -103,7 +104,7 @@ void registrar_rutas_catalogo(httplib::Server& svr, Estado& estado) {
 
     svr.Delete(R"(/api/docentes/([^/]+))", [](const httplib::Request& req, httplib::Response& res) {
         const std::string id = req.matches[1].str();
-        std::lock_guard<std::mutex> candado(mtx_docentes);
+        std::lock_guard<std::mutex> candado(candado_docentes());
         if (!eliminarDocente(id)) {
             responder_error(res, "No existe el docente " + id + ".", 404);
             return;
@@ -153,14 +154,14 @@ void registrar_rutas_catalogo(httplib::Server& svr, Estado& estado) {
                 return;
             }
         }
-        std::lock_guard<std::mutex> candado(mtx_docentes);
+        std::lock_guard<std::mutex> candado(candado_docentes());
         quitar_asignaciones("", codigo);
         responder_json(res, ok_simple());
     });
 
     // ---------- Asignaciones ----------
     svr.Get("/api/asignaciones", [](const httplib::Request&, httplib::Response& res) {
-        std::lock_guard<std::mutex> candado(mtx_docentes);
+        std::lock_guard<std::mutex> candado(candado_docentes());
         responder_json_texto(res, obtenerAsignacionesJSON());
     });
 
@@ -179,7 +180,7 @@ void registrar_rutas_catalogo(httplib::Server& svr, Estado& estado) {
                 return;
             }
         }
-        std::lock_guard<std::mutex> candado(mtx_docentes);
+        std::lock_guard<std::mutex> candado(candado_docentes());
         if (!existe_docente(docente_id)) {
             responder_error(res, "No existe el docente " + docente_id + ".", 404);
             return;
@@ -199,16 +200,11 @@ void registrar_rutas_catalogo(httplib::Server& svr, Estado& estado) {
     });
 
     svr.Delete(R"(/api/asignaciones/([^/]+)/([^/]+))", [](const httplib::Request& req, httplib::Response& res) {
-        std::lock_guard<std::mutex> candado(mtx_docentes);
+        std::lock_guard<std::mutex> candado(candado_docentes());
         if (!eliminarAsignacion(req.matches[1].str(), req.matches[2].str())) {
             responder_error(res, "No existe esa asignación.", 404);
             return;
         }
         responder_json(res, ok_simple());
-    });
-
-    // ---------- Árbol académico ----------
-    svr.Get("/api/arbol", [](const httplib::Request&, httplib::Response& res) {
-        responder_json_texto(res, obtenerArbolJSON());
     });
 }

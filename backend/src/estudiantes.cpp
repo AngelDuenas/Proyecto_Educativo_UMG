@@ -5,6 +5,7 @@
 //   DELETE /api/estudiantes/{carnet}
 #include "estudiantes.hpp"
 
+#include <iostream>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -134,6 +135,9 @@ void registrar_rutas_estudiantes(httplib::Server& svr, Estado& estado) {
             responder_error(res, "Se alcanzó el máximo de estudiantes (" + std::to_string(MAX_ESTUDIANTES) + ").", 400);
             return;
         }
+        std::cout << "[matriz] Estudiante " << nuevo.carnet << " -> fila " << (estado.estudiantes.size() - 1)
+                  << " de notas[" << MAX_ESTUDIANTES << "][" << MAX_CURSOS << "] y asistencia["
+                  << MAX_ESTUDIANTES << "][" << DIAS_SEMANA << "]" << std::endl;
         responder_json(res, estudiante_a_json(nuevo), 201);
     });
 
@@ -164,10 +168,13 @@ void registrar_rutas_estudiantes(httplib::Server& svr, Estado& estado) {
     svr.Delete(R"(/api/estudiantes/([^/]+))", [&estado](const httplib::Request& req, httplib::Response& res) {
         const std::string carnet = req.matches[1].str();
         std::lock_guard<std::mutex> candado(estado.mtx);
+        const int fila = indice_estudiante(estado, carnet);
         if (quitar_estudiante(estado, carnet) == Resultado::NO_EXISTE) {   // también desplaza las matrices
             responder_error(res, "No existe el estudiante " + carnet + ".", 404);
             return;
         }
+        std::cout << "[matriz] Estudiante " << carnet << " eliminado: se quitó la fila " << fila
+                  << " y las de abajo subieron una posición" << std::endl;
         json ok = json::object();
         ok["ok"] = true;
         responder_json(res, ok);
