@@ -1,8 +1,3 @@
-// DUEÑO: P1 (conecta el código de Cristian con el servidor HTTP)
-//   GET/POST/DELETE /api/docentes        -> docentes.cpp de Cristian
-//   GET/POST/DELETE /api/asignaciones    -> docentes.cpp de Cristian
-//   GET/POST/DELETE /api/cursos          -> catálogo en Estado (así las notas y el grafo siempre
-//                                           usan los mismos cursos que ve la pantalla de Docentes y Cursos)
 #include "rutas_catalogo.hpp"
 
 #include <mutex>
@@ -12,7 +7,7 @@
 #include "respuestas.hpp"
 
 std::mutex& candado_docentes() {
-    static std::mutex mtx;   // el módulo de Cristian no es seguro entre hilos: se protege aquí
+    static std::mutex mtx;
     return mtx;
 }
 
@@ -47,7 +42,6 @@ int leer_entero(const json& c, const char* campo, int por_defecto) {
     return por_defecto;
 }
 
-// Las funciones de Cristian devuelven el JSON como texto; aquí se vuelve a leer para consultarlo.
 json leer_lista(const std::string& texto) {
     json lista = json::parse(texto, nullptr, false);
     return lista.is_array() ? lista : json::array();
@@ -66,7 +60,6 @@ bool existe_asignacion(const std::string& docente_id, const std::string& curso_c
     return false;
 }
 
-// Quita todas las asignaciones que cumplan el filtro (por docente o por curso).
 void quitar_asignaciones(const std::string& docente_id, const std::string& curso_codigo) {
     for (const json& a : leer_lista(obtenerAsignacionesJSON())) {
         if (!a.contains("docenteId") || !a.contains("cursoCodigo")) continue;
@@ -76,10 +69,9 @@ void quitar_asignaciones(const std::string& docente_id, const std::string& curso
     }
 }
 
-}  // namespace
+}  
 
 void registrar_rutas_catalogo(httplib::Server& svr, Estado& estado) {
-    // ---------- Docentes ----------
     svr.Get("/api/docentes", [](const httplib::Request&, httplib::Response& res) {
         std::lock_guard<std::mutex> candado(candado_docentes());
         responder_json_texto(res, obtenerDocentesJSON());
@@ -109,11 +101,10 @@ void registrar_rutas_catalogo(httplib::Server& svr, Estado& estado) {
             responder_error(res, "No existe el docente " + id + ".", 404);
             return;
         }
-        quitar_asignaciones(id, "");   // al eliminar al docente se quitan sus asignaciones
+        quitar_asignaciones(id, "");  
         responder_json(res, ok_simple());
     });
 
-    // ---------- Cursos (catálogo en Estado) ----------
     svr.Get("/api/cursos", [&estado](const httplib::Request&, httplib::Response& res) {
         std::lock_guard<std::mutex> candado(estado.mtx);
         json arreglo = json::array();
@@ -133,7 +124,7 @@ void registrar_rutas_catalogo(httplib::Server& svr, Estado& estado) {
         nuevo.semestre = leer_entero(cuerpo, "semestre", 1);
 
         std::lock_guard<std::mutex> candado(estado.mtx);
-        const Resultado r = agregar_curso(estado, nuevo);   // agrega la columna a la matriz de notas
+        const Resultado r = agregar_curso(estado, nuevo);   
         if (r == Resultado::DUPLICADO) {
             responder_error(res, "Ya existe un curso con el código " + nuevo.codigo + ".", 409);
             return;
@@ -149,7 +140,7 @@ void registrar_rutas_catalogo(httplib::Server& svr, Estado& estado) {
         const std::string codigo = req.matches[1].str();
         {
             std::lock_guard<std::mutex> candado(estado.mtx);
-            if (quitar_curso(estado, codigo) == Resultado::NO_EXISTE) {   // quita la columna y los prerrequisitos
+            if (quitar_curso(estado, codigo) == Resultado::NO_EXISTE) {  
                 responder_error(res, "No existe el curso " + codigo + ".", 404);
                 return;
             }
@@ -159,7 +150,6 @@ void registrar_rutas_catalogo(httplib::Server& svr, Estado& estado) {
         responder_json(res, ok_simple());
     });
 
-    // ---------- Asignaciones ----------
     svr.Get("/api/asignaciones", [](const httplib::Request&, httplib::Response& res) {
         std::lock_guard<std::mutex> candado(candado_docentes());
         responder_json_texto(res, obtenerAsignacionesJSON());

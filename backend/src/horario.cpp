@@ -1,4 +1,3 @@
-// Módulo Horarios. Formato definido por vista-horario.js.
 #include "horario.hpp"
 
 #include <algorithm>
@@ -18,8 +17,6 @@ const char* NOMBRES_DIA[DIAS_SEMANA] = {"Lunes", "Martes", "Miércoles", "Jueves
 const char* INICIO_PERIODO[PERIODOS] = {"07:00", "07:50", "08:40", "09:50", "10:40", "11:30"};
 const char* FIN_PERIODO[PERIODOS]    = {"07:50", "08:40", "09:30", "10:40", "11:30", "12:20"};
 
-// Horario de ejemplo: un texto por bloque con los códigos separados por espacio.
-// El viernes 09:50 tiene MAT101 y PRG101 juntos a propósito: Ana Lucía está inscrita en los dos (choque).
 const char* HORARIO_EJEMPLO[DIAS_SEMANA][PERIODOS] = {
     {"MAT101", "PRG101", "LOG101", "MAT102", "PRG102", "FIS101"},
     {"ALG201", "MDS201", "PRG201", "EDD301", "MAT101", "PRG101"},
@@ -42,10 +39,9 @@ std::vector<std::string> separar(const std::string& texto) {
     return partes;
 }
 
-// Relaciones que se necesitan para detectar choques, tomadas de los otros módulos.
 struct Contexto {
-    std::map<std::string, std::vector<std::string>> docentes_de_curso;   // curso -> nombres de docentes
-    std::map<std::string, std::set<std::string>> cursos_de_estudiante;   // carnet -> cursos inscritos
+    std::map<std::string, std::vector<std::string>> docentes_de_curso;   
+    std::map<std::string, std::set<std::string>> cursos_de_estudiante;   
     std::map<std::string, std::string> nombre_estudiante;
 };
 
@@ -54,7 +50,6 @@ Contexto armar_contexto(const Estado& e) {
     for (const Estudiante& s : e.estudiantes) ctx.nombre_estudiante[s.carnet] = s.nombre;
     for (const Inscripcion& x : e.inscripciones) ctx.cursos_de_estudiante[x.carnet].insert(x.curso);
 
-    // Docentes y asignaciones viven en el módulo de Cristian (orden de candados: estado y luego docentes).
     std::lock_guard<std::mutex> candado(candado_docentes());
     std::map<std::string, std::string> nombre_docente;
     json docentes = json::parse(obtenerDocentesJSON(), nullptr, false);
@@ -69,7 +64,6 @@ Contexto armar_contexto(const Estado& e) {
     return ctx;
 }
 
-// Choques de un bloque: docentes o estudiantes que aparecen en dos o más de sus cursos.
 void buscar_choques(const std::vector<std::string>& bloque, int dia, int periodo, const Contexto& ctx, json& choques) {
     if (bloque.size() < 2) return;
     std::map<std::string, std::vector<std::string>> por_docente, por_estudiante;
@@ -104,7 +98,7 @@ bool leer_entero(const json& c, const char* campo, int& destino) {
     return true;
 }
 
-}  // namespace
+} 
 
 void cargar_ejemplo_horario(Estado& e) {
     for (int d = 0; d < DIAS_SEMANA; ++d)
@@ -191,7 +185,6 @@ void registrar_rutas_horario(httplib::Server& svr, Estado& estado) {
             celdas.push_back(fila);
         }
 
-        // Cuántos bloques tiene cada curso a la semana (para compararlo con sus créditos).
         json por_curso = json::array();
         for (const CursoEstado& c : estado.cursos) {
             if (!carnet.empty() && (inscritos == ctx.cursos_de_estudiante.end() || !inscritos->second.count(c.codigo))) continue;
@@ -248,7 +241,6 @@ void registrar_rutas_horario(httplib::Server& svr, Estado& estado) {
         }
         estado.horario[dia][periodo] = bloque;
 
-        // Se guarda igual, pero se avisa si el bloque quedó con algún choque.
         json choques = json::array();
         buscar_choques(bloque, dia, periodo, armar_contexto(estado), choques);
         json datos = json::object();

@@ -1,9 +1,3 @@
-// DUEÑO: P3 (base mínima hecha por P1 para que la vista funcione; P3 puede mejorarla o reemplazarla)
-//   GET /api/grafo                      -> {nodos:[{codigo,nombre}], matriz:[[0,1,...]]}
-//   GET /api/grafo/bfs?origen=MAT101    -> {origen, orden:["MAT101","MAT102",...]}
-//   GET /api/grafo/dfs?origen=MAT101    -> igual, en profundidad
-//   GET /api/grafo/ruta?desde=MAT101&hasta=ALG201 -> {existe, ruta:["MAT101","MAT102","ALG201"]}
-// Es una vista de MUESTRA (solo lectura): los prerrequisitos son los del plan de estudios.
 #include "grafo.hpp"
 
 #include <algorithm>
@@ -17,7 +11,6 @@ namespace {
 
 size_t total_vertices(const Estado& e) { return std::min(e.cursos.size(), static_cast<size_t>(MAX_CURSOS)); }
 
-// Camino más corto (en número de aristas) de `desde` a `hasta` con BFS, guardando el padre de cada vértice.
 std::vector<int> buscar_ruta(const Estado& e, int desde, int hasta) {
     const size_t n = total_vertices(e);
     std::vector<int> padre(n, -1);
@@ -43,8 +36,6 @@ std::vector<int> buscar_ruta(const Estado& e, int desde, int hasta) {
     std::reverse(ruta.begin(), ruta.end());
     return ruta;
 }
-
-}  // namespace
 
 void registrar_rutas_grafo(httplib::Server& svr, Estado& estado) {
     svr.Get("/api/grafo", [&estado](const httplib::Request&, httplib::Response& res) {

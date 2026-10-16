@@ -1,6 +1,3 @@
-// Módulo Inscripciones. Formato definido por vista-inscripciones.js.
-// Une tres estructuras: el vector de inscripciones, la matriz de notas (¿ya aprobó?)
-// y la matriz de adyacencia del grafo (¿qué prerrequisitos tiene el curso?).
 #include "inscripciones.hpp"
 
 #include <algorithm>
@@ -31,10 +28,9 @@ json nota_o_null(float nota) {
     return json(static_cast<double>(nota));
 }
 
-}  // namespace
+}  
 
 std::vector<int> prerrequisitos_pendientes(const Estado& e, size_t fila, size_t curso) {
-    // Columna `curso` de la matriz de adyacencia: adyacencia[i][curso] = 1 si i es prerrequisito.
     std::vector<int> faltan;
     const size_t n = std::min(e.cursos.size(), static_cast<size_t>(MAX_CURSOS));
     for (size_t i = 0; i < n; ++i)
@@ -43,7 +39,6 @@ std::vector<int> prerrequisitos_pendientes(const Estado& e, size_t fila, size_t 
 }
 
 void cargar_ejemplo_inscripciones(Estado& e) {
-    // Algunos estudiantes repiten cursos que reprobaron (nota < 61 en los datos de ejemplo).
     e.inscripciones = {
         {"0901-26-1001", "MAT101"}, {"0901-26-1001", "PRG101"},
         {"0901-26-1002", "PRG201"}, {"0901-26-1003", "MAT102"},

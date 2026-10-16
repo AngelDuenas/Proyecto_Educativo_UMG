@@ -1,5 +1,4 @@
 // Módulo Álgebra lineal aplicada. Formato definido por vista-algebra.js.
-// Las operaciones están escritas a mano (ciclos anidados) para que se vea cómo funcionan.
 #include "algebra.hpp"
 
 #include <algorithm>
@@ -25,7 +24,7 @@ json redondear_matriz(const Matriz& m) {
     return r;
 }
 
-}  // namespace
+} 
 
 Matriz transponer(const Matriz& a) {
     if (a.empty()) return {};
@@ -58,7 +57,7 @@ void registrar_rutas_algebra(httplib::Server& svr, Estado& estado) {
         const size_t n = std::min(estado.estudiantes.size(), static_cast<size_t>(MAX_ESTUDIANTES));
         const size_t m = std::min(estado.cursos.size(), static_cast<size_t>(MAX_CURSOS));
 
-        // A: matriz de notas (una celda sin nota cuenta como 0 en los productos y se marca aparte).
+        
         Matriz a(n, std::vector<double>(m, 0.0));
         json a_json = json::array();
         for (size_t i = 0; i < n; ++i) {
@@ -71,7 +70,7 @@ void registrar_rutas_algebra(httplib::Server& svr, Estado& estado) {
             a_json.push_back(fila);
         }
 
-        // Vector de créditos c y producto A·c (suma de nota × créditos de cada estudiante).
+        // Vector de créditos c y producto A·c
         std::vector<double> c(m, 0.0);
         for (size_t j = 0; j < m; ++j) c[j] = estado.cursos[j].creditos;
         const std::vector<double> ac = por_vector(a, c);

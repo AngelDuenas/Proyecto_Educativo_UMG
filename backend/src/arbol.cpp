@@ -1,4 +1,4 @@
-// DUEÑO: P3 · Árbol académico (n-ario). Formato definido por vista-arbol.js.
+// Árbol académico
 #include "arbol.hpp"
 
 #include <mutex>
@@ -36,7 +36,7 @@ json recorrido_a_json(const NodoArbol* raiz, const std::string& tipo) {
     return json(nombres);
 }
 
-}  // namespace
+} 
 
 NodoArbol* construir_arbol(const Estado& e) {
     NodoArbol* raiz = crear_nodo("Universidad Mariano Gálvez", "Universidad");
@@ -45,7 +45,6 @@ NodoArbol* construir_arbol(const Estado& e) {
     raiz->hijos.push_back(facultad);
     facultad->hijos.push_back(carrera);
 
-    // Un nodo por semestre (ordenados) y, debajo, sus cursos en el orden del catálogo.
     std::set<int> semestres;
     for (const CursoEstado& c : e.cursos) semestres.insert(c.semestre);
     for (int s : semestres) {
@@ -99,7 +98,7 @@ void registrar_rutas_arbol(httplib::Server& svr, Estado& estado) {
 
         json datos = json::object();
         datos["raiz"] = nodo_a_json(raiz);
-        datos["recorrido"] = recorridos["preorden"];   // el que anima la vista
+        datos["recorrido"] = recorridos["preorden"];
         datos["recorridos"] = recorridos;
         liberar_arbol(raiz);
         responder_json(res, datos);

@@ -1,4 +1,4 @@
-// DUEÑO: P1/P2/P4 · algoritmos sobre las matrices y el grafo
+// DUEÑO: algoritmos sobre las matrices y el grafo
 #include "algoritmos.hpp"
 
 #include <algorithm>
@@ -12,16 +12,15 @@ double redondear(double valor, int decimales) {
 namespace {
 size_t filas(const Estado& e)    { return std::min(e.estudiantes.size(), static_cast<size_t>(MAX_ESTUDIANTES)); }
 size_t columnas(const Estado& e) { return std::min(e.cursos.size(), static_cast<size_t>(MAX_CURSOS)); }
-bool hay_nota(float n)           { return n >= 0.0f; }   // SIN_NOTA es -1
-}  // namespace
+bool hay_nota(float n)           { return n >= 0.0f; }  
+} 
 
-// Recorre la FILA del estudiante sumando solo las notas que existen.
 bool promedio_estudiante(const Estado& e, size_t fila, double& promedio) {
     if (fila >= filas(e)) return false;
     double suma = 0.0;
     int cantidad = 0;
     for (size_t j = 0; j < columnas(e); ++j) {
-        if (hay_nota(e.notas[fila][j])) { suma += e.notas[fila][j]; ++cantidad; }   // se ignora SIN_NOTA
+        if (hay_nota(e.notas[fila][j])) { suma += e.notas[fila][j]; ++cantidad; } 
     }
     if (cantidad == 0) return false;
     promedio = suma / cantidad;
@@ -92,7 +91,6 @@ double porcentaje_dia(const Estado& e, int dia) {
 }
 
 namespace {
-// Insertion sort estable sobre una lista de índices, de MAYOR a menor valor.
 void ordenar_desc(std::vector<size_t>& idx, const std::vector<double>& valor) {
     for (size_t i = 1; i < idx.size(); ++i) {
         const size_t clave = idx[i];
@@ -101,7 +99,7 @@ void ordenar_desc(std::vector<size_t>& idx, const std::vector<double>& valor) {
         idx[j] = clave;
     }
 }
-}  // namespace
+} 
 
 std::vector<size_t> ranking_por_promedio(const Estado& e) {
     std::vector<double> valor(filas(e), 0.0);
@@ -122,7 +120,6 @@ std::vector<size_t> ranking_por_asistencia(const Estado& e) {
     return idx;
 }
 
-// BFS: visita primero los cursos más cercanos, usando una cola.
 std::vector<int> recorrido_bfs(const Estado& e, int origen) {
     const int n = static_cast<int>(columnas(e));
     std::vector<int> orden;
@@ -152,7 +149,7 @@ void dfs_visitar(const Estado& e, int actual, int n, std::vector<bool>& visitado
     for (int j = 0; j < n; ++j)
         if (e.adyacencia[actual][j] == 1 && !visitado[static_cast<size_t>(j)]) dfs_visitar(e, j, n, visitado, orden);
 }
-}  // namespace
+}
 
 // DFS: baja lo más profundo posible por un camino antes de probar el siguiente.
 std::vector<int> recorrido_dfs(const Estado& e, int origen) {
