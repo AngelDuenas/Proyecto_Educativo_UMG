@@ -1,7 +1,3 @@
-// DUEÑO: P2 · Módulo Notas — formato definido por vista-calificaciones.js
-//   GET /api/notas          -> {estudiantes:[{carnet,nombre}], cursos:[{codigo,nombre}], matriz:[[85,null,...]]}
-//   PUT /api/notas          {carnet, curso, nota}   (nota 0-100, o null para borrarla)
-//   GET /api/estadisticas   -> promedios, mayor/menor, aprobados/reprobados
 #include "notas.hpp"
 
 #include <algorithm>
@@ -18,7 +14,7 @@ size_t filas(const Estado& e)    { return std::min(e.estudiantes.size(), static_
 size_t columnas(const Estado& e) { return std::min(e.cursos.size(), static_cast<size_t>(MAX_CURSOS)); }
 
 json nota_a_json(float valor) {
-    if (valor < 0.0f) return json(nullptr);              // SIN_NOTA se envía como null
+    if (valor < 0.0f) return json(nullptr);             
     return json(redondear(static_cast<double>(valor)));
 }
 
@@ -36,10 +32,9 @@ json extremo_a_json(const Extremo& x) {
     return j;
 }
 
-}  // namespace
+} 
 
 void registrar_rutas_notas(httplib::Server& svr, Estado& estado) {
-    // ---- Matriz completa ----
     svr.Get("/api/notas", [&estado](const httplib::Request&, httplib::Response& res) {
         std::lock_guard<std::mutex> candado(estado.mtx);
         const size_t ne = filas(estado), nc = columnas(estado);
@@ -69,8 +64,7 @@ void registrar_rutas_notas(httplib::Server& svr, Estado& estado) {
         datos["matriz"] = matriz;
         responder_json(res, datos);
     });
-
-    // ---- Ingresar, cambiar o borrar una nota ----
+    
     svr.Put("/api/notas", [&estado](const httplib::Request& req, httplib::Response& res) {
         json cuerpo;
         if (!leer_cuerpo_json(req, res, cuerpo)) return;
@@ -124,7 +118,6 @@ void registrar_rutas_notas(httplib::Server& svr, Estado& estado) {
         responder_json(res, datos);
     });
 
-    // ---- Estadísticas ----
     svr.Get("/api/estadisticas", [&estado](const httplib::Request&, httplib::Response& res) {
         std::lock_guard<std::mutex> candado(estado.mtx);
         const size_t ne = filas(estado), nc = columnas(estado);
@@ -132,7 +125,7 @@ void registrar_rutas_notas(httplib::Server& svr, Estado& estado) {
         json por_estudiante = json::array();
         for (size_t i = 0; i < ne; ++i) {
             double p = 0.0;
-            const bool hay = promedio_estudiante(estado, i, p);        // promedio de la FILA
+            const bool hay = promedio_estudiante(estado, i, p);        
             json o = json::object();
             o["carnet"] = estado.estudiantes[i].carnet;
             o["promedio"] = promedio_a_json(hay, p);
@@ -141,7 +134,7 @@ void registrar_rutas_notas(httplib::Server& svr, Estado& estado) {
         json por_curso = json::array();
         for (size_t j = 0; j < nc; ++j) {
             double p = 0.0;
-            const bool hay = promedio_curso(estado, j, p);             // promedio de la COLUMNA
+            const bool hay = promedio_curso(estado, j, p);          
             json o = json::object();
             o["codigo"] = estado.cursos[j].codigo;
             o["promedio"] = promedio_a_json(hay, p);

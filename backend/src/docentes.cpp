@@ -73,8 +73,6 @@ std::string obtenerAsignacionesJSON() {
     return r + "]";
 }
 
-// Siguiente id libre: uno más que el mayor usado (D01, D02, ..., D10). Cuenta también los eliminados,
-// así un id nunca se reutiliza.
 static std::string siguienteIdDocente() {
     int mayor = 0;
     for (int i = 0; i < totalDocentes; i++) {

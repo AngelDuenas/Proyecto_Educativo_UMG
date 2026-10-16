@@ -1,6 +1,3 @@
-// DUEÑO: P4 · Reportes — formato definido por vista-reportes.js
-//   GET /api/reportes -> {rankingNotas:[{carnet,nombre,promedio}], rankingAsistencia:[{carnet,nombre,porcentaje}]}
-//   (ambos ya ordenados de mayor a menor)
 #include "reportes.hpp"
 
 #include <mutex>

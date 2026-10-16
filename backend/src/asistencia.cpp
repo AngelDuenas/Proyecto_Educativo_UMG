@@ -1,6 +1,4 @@
-// DUEÑO: P4 · Módulo Asistencia — formato definido por vista-asistencia.js
-//   GET /api/asistencia -> {dias, estudiantes:[{carnet,nombre}], matriz:[[1,1,0,1,1]], porEstudiante:[%], porDia:[%]}
-//   PUT /api/asistencia {carnet, dia (0 a 4), valor (1 presente / 0 ausente)}
+// Módulo Asistencia 
 #include "asistencia.hpp"
 
 #include <algorithm>
@@ -61,7 +59,6 @@ void registrar_rutas_asistencia(httplib::Server& svr, Estado& estado) {
             return;
         }
 
-        // `valor` puede ser 1/0 o true/false; cualquier otra cosa cuenta como ausente (igual que el frontend).
         int valor = 0;
         if (cuerpo.contains("valor")) {
             const json& v = cuerpo.at("valor");

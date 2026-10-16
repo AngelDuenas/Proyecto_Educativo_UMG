@@ -1,8 +1,4 @@
-// DUEÑO: P1 · Módulo Estudiantes (CRUD) — formato definido por la vista-estudiantes.js
-//   GET    /api/estudiantes?buscar=&orden=nombre|nombre-desc|carnet|semestre
-//   POST   /api/estudiantes          {carnet, nombre, carrera, semestre}
-//   PUT    /api/estudiantes/{carnet} {nombre, carrera, semestre}   (se puede mandar solo lo que cambia)
-//   DELETE /api/estudiantes/{carnet}
+//Módulo Estudiantes
 #include "estudiantes.hpp"
 
 #include <iostream>
@@ -31,7 +27,6 @@ json estudiante_a_json(const Estudiante& e) {
     return j;
 }
 
-// Lee un campo de texto opcional. Devuelve false si existe pero no es texto.
 bool leer_texto(const json& c, const char* campo, std::string& destino, bool& presente) {
     presente = c.contains(campo) && !c.at(campo).is_null();
     if (!presente) return true;
@@ -40,7 +35,6 @@ bool leer_texto(const json& c, const char* campo, std::string& destino, bool& pr
     return true;
 }
 
-// Acepta 2 o "2". Devuelve false si no es un entero entre 1 y 12.
 bool leer_semestre(const json& c, int& destino, bool& presente) {
     presente = c.contains("semestre") && !c.at("semestre").is_null();
     if (!presente) return true;
@@ -65,7 +59,6 @@ bool leer_semestre(const json& c, int& destino, bool& presente) {
     return true;
 }
 
-// Aplica los campos del JSON sobre `e`. Devuelve "" si todo está bien, o el mensaje de error.
 std::string aplicar_campos(const json& c, Estudiante& e) {
     bool presente = false;
     if (!leer_texto(c, "nombre", e.nombre, presente)) return "El nombre debe ser texto.";
@@ -77,10 +70,9 @@ std::string aplicar_campos(const json& c, Estudiante& e) {
     return "";
 }
 
-}  // namespace
+} 
 
 void registrar_rutas_estudiantes(httplib::Server& svr, Estado& estado) {
-    // ---- Listar, con búsqueda y orden ----
     svr.Get("/api/estudiantes", [&estado](const httplib::Request& req, httplib::Response& res) {
         std::lock_guard<std::mutex> candado(estado.mtx);
 
@@ -88,7 +80,6 @@ void registrar_rutas_estudiantes(httplib::Server& svr, Estado& estado) {
         const std::string buscar_norm = normalizar_texto(buscar);
         const std::string orden = req.has_param("orden") ? req.get_param_value("orden") : "nombre";
 
-        // Búsqueda lineal: se queda con quien coincide por nombre (sin tildes) o por carnet.
         std::vector<Estudiante> lista;
         for (const Estudiante& e : estado.estudiantes) {
             if (buscar.empty() || normalizar_texto(e.nombre).find(buscar_norm) != std::string::npos ||
@@ -103,7 +94,6 @@ void registrar_rutas_estudiantes(httplib::Server& svr, Estado& estado) {
         responder_json(res, arreglo);
     });
 
-    // ---- Registrar ----
     svr.Post("/api/estudiantes", [&estado](const httplib::Request& req, httplib::Response& res) {
         json cuerpo;
         if (!leer_cuerpo_json(req, res, cuerpo)) return;
@@ -141,7 +131,6 @@ void registrar_rutas_estudiantes(httplib::Server& svr, Estado& estado) {
         responder_json(res, estudiante_a_json(nuevo), 201);
     });
 
-    // ---- Editar ----
     svr.Put(R"(/api/estudiantes/([^/]+))", [&estado](const httplib::Request& req, httplib::Response& res) {
         json cuerpo;
         if (!leer_cuerpo_json(req, res, cuerpo)) return;
@@ -153,7 +142,6 @@ void registrar_rutas_estudiantes(httplib::Server& svr, Estado& estado) {
             responder_error(res, "No existe el estudiante " + carnet + ".", 404);
             return;
         }
-        // Se trabaja sobre una copia: si hay error de validación, el original no se toca.
         Estudiante actualizado = estado.estudiantes[static_cast<size_t>(pos)];
         const std::string error = aplicar_campos(cuerpo, actualizado);
         if (!error.empty()) {
@@ -164,7 +152,6 @@ void registrar_rutas_estudiantes(httplib::Server& svr, Estado& estado) {
         responder_json(res, estudiante_a_json(actualizado));
     });
 
-    // ---- Eliminar ----
     svr.Delete(R"(/api/estudiantes/([^/]+))", [&estado](const httplib::Request& req, httplib::Response& res) {
         const std::string carnet = req.matches[1].str();
         std::lock_guard<std::mutex> candado(estado.mtx);

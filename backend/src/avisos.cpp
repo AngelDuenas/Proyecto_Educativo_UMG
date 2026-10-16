@@ -1,4 +1,4 @@
-// Módulo Avisos / calendario. Formato definido por vista-avisos.js.
+// Módulo Avisos / calendario.
 #include "avisos.hpp"
 
 #include <algorithm>
@@ -18,7 +18,6 @@ bool tipo_valido(const std::string& tipo) {
     return false;
 }
 
-// "AAAA-MM-DD" con un día que exista en ese mes (también revisa años bisiestos).
 bool fecha_valida(const std::string& f) {
     if (f.size() != 10 || f[4] != '-' || f[7] != '-') return false;
     for (size_t i = 0; i < f.size(); ++i)
@@ -43,7 +42,6 @@ std::string texto(const json& c, const char* campo) {
     return recortar(c.at(campo).get<std::string>());
 }
 
-// Valida el cuerpo y llena `a` (sin tocar su id). Si algo falla responde el error y devuelve false.
 bool leer_aviso(const json& c, const Estado& e, Aviso& a, httplib::Response& res) {
     a.titulo = texto(c, "titulo");
     a.descripcion = texto(c, "descripcion");
@@ -87,7 +85,6 @@ json aviso_a_json(const Estado& e, const Aviso& a) {
     return j;
 }
 
-// Id de la URL (solo dígitos). Uno demasiado largo no puede existir: se trata como -1.
 int id_de_url(const std::string& texto) {
     return texto.size() > 9 ? -1 : std::stoi(texto);
 }
@@ -98,7 +95,7 @@ int buscar(const Estado& e, int id) {
     return -1;
 }
 
-}  // namespace
+}
 
 void cargar_ejemplo_avisos(Estado& e) {
     e.avisos = {
@@ -116,7 +113,7 @@ json avisos_a_json(const Estado& e) {
     json lista = json::array();
     for (const Aviso& a : e.avisos) {
         json j = aviso_a_json(e, a);
-        j.erase("cursoNombre");   // se calcula al consultar
+        j.erase("cursoNombre");
         lista.push_back(j);
     }
     return lista;
@@ -149,7 +146,6 @@ void registrar_rutas_avisos(httplib::Server& svr, Estado& estado) {
     svr.Get("/api/avisos", [&estado](const httplib::Request&, httplib::Response& res) {
         std::lock_guard<std::mutex> candado(estado.mtx);
         std::vector<Aviso> ordenados = estado.avisos;
-        // "AAAA-MM-DD" se ordena bien como texto.
         std::stable_sort(ordenados.begin(), ordenados.end(), [](const Aviso& a, const Aviso& b) { return a.fecha < b.fecha; });
         json lista = json::array();
         for (const Aviso& a : ordenados) lista.push_back(aviso_a_json(estado, a));

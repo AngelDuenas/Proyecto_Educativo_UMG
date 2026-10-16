@@ -39,8 +39,6 @@ bool eliminarCurso(const std::string& codigo);
 bool crearAsignacion(const std::string& docenteId, const std::string& cursoCodigo);
 bool eliminarAsignacion(const std::string& docenteId, const std::string& cursoCodigo);
 
-// Persistencia: reemplaza docentes y asignaciones por los leídos de data/ (conserva los ids).
-// Devuelve false si no caben (más de MAX_REGISTROS).
 bool reemplazarDocentesYAsignaciones(const std::vector<Docente>& docentes, const std::vector<Asignacion>& asignaciones);
 
 #endif

@@ -1,20 +1,3 @@
-// DUEÑO: P2 · Tareas: T24 — VERSIÓN BÁSICA
-// Formato de los archivos en data/:
-//   estudiantes.json -> [ {carnet, nombre, carrera, semestre}, ... ]
-//   cursos.json      -> [ {codigo, nombre, creditos, semestre}, ... ]
-//   notas.json       -> { "0901-26-1001": { "MAT101": 85, "PRG101": 90 }, ... }   (solo las notas que existen)
-//   asistencia.json  -> { "0901-26-1001": [1,1,0,1,1], ... }
-//   docentes.json    -> [ {id, nombre, especialidad}, ... ]
-//   asignaciones.json-> [ {docenteId, cursoCodigo}, ... ]
-//   asignaciones_estudiantes.json -> [ {carnet, curso}, ... ]   (inscripciones)
-//   horario.json     -> { "celdas": [ [ ["MAT101"], ... 6 periodos ], ... 5 días ] }
-//   avisos.json      -> [ {id, titulo, descripcion, fecha, tipo, curso}, ... ]
-// cargar_todo() solo reemplaza los datos si LOS CUATRO primeros archivos existen y son válidos;
-// si no, deja intactos los datos que ya están en memoria (los de ejemplo). Los otros son
-// opcionales: si faltan o están dañados se usan los de ejemplo solo para esa parte.
-// El árbol y el grafo son de MUESTRA: se arman con los cursos y los prerrequisitos del plan, no se guardan.
-// main.cpp llama a guardar_todo() después de cada cambio exitoso (guardado automático).
-// TODO(P2, T24): copias de seguridad en data/backup/.
 #include "persistencia.hpp"
 
 #include <algorithm>
@@ -45,8 +28,8 @@ Lectura leer_archivo(const std::string& ruta, json& salida) {
     std::stringstream buffer;
     buffer << archivo.rdbuf();
     std::string texto = buffer.str();
-    if (texto.find_first_not_of(" \t\r\n") == std::string::npos) return Lectura::NO_HAY;   // vacío
-    if (texto.compare(0, 3, "\xEF\xBB\xBF") == 0) texto.erase(0, 3);                       // quita el BOM
+    if (texto.find_first_not_of(" \t\r\n") == std::string::npos) return Lectura::NO_HAY; 
+    if (texto.compare(0, 3, "\xEF\xBB\xBF") == 0) texto.erase(0, 3);             
     salida = json::parse(texto, nullptr, false);
     return salida.is_discarded() ? Lectura::INVALIDO : Lectura::OK;
 }
@@ -58,7 +41,6 @@ bool escribir_archivo(const std::string& ruta, const json& contenido) {
     return archivo.good();
 }
 
-// Los ids de docentes son "D01", "D02"...; si el archivo trae números (1, 2...) se convierten.
 std::string id_docente(const json& valor) {
     if (valor.is_string()) return valor.get<std::string>();
     if (valor.is_number_integer()) {
@@ -68,8 +50,6 @@ std::string id_docente(const json& valor) {
     throw std::runtime_error("id de docente inválido");
 }
 
-// Lee docentes.json y asignaciones.json. Devuelve false si docentes.json no existe o no sirve.
-// `hay_asignaciones` queda en false si asignaciones.json falta o está vacío.
 bool leer_docentes(const std::string& dir, std::vector<Docente>& docentes, std::vector<Asignacion>& asignaciones,
                    bool& hay_asignaciones) {
     json j_doc, j_asg;
@@ -89,7 +69,7 @@ bool leer_docentes(const std::string& dir, std::vector<Docente>& docentes, std::
 }
 
 
-}  // namespace
+}  
 
 bool guardar_todo(Estado& e, const std::string& dir) {
     std::error_code ec;
@@ -133,7 +113,6 @@ bool guardar_todo(Estado& e, const std::string& dir) {
     todo_bien = escribir_archivo(dir + "/avisos.json", avisos_a_json(e)) && todo_bien;
 
 
-    // Docentes y asignaciones viven en el módulo de Cristian (con su propio candado).
     {
         std::lock_guard<std::mutex> candado(candado_docentes());
         json docentes = json::parse(obtenerDocentesJSON(), nullptr, false);
@@ -156,7 +135,6 @@ bool cargar_todo(Estado& e, const std::string& dir) {
         }
     }
 
-    // Primero se lee todo en variables temporales; el estado real solo se toca si TODO se leyó bien.
     std::vector<Estudiante> estudiantes;
     std::vector<CursoEstado> cursos;
     std::map<std::string, std::map<std::string, double>> notas;
@@ -196,7 +174,6 @@ bool cargar_todo(Estado& e, const std::string& dir) {
         return false;
     }
 
-    // ---- Aplicar al estado ----
     e.estudiantes = estudiantes;
     e.cursos = cursos;
     for (int i = 0; i < MAX_ESTUDIANTES; ++i) {
@@ -215,10 +192,8 @@ bool cargar_todo(Estado& e, const std::string& dir) {
         if (fa != asistencia.end())
             for (size_t d = 0; d < fa->second.size() && d < static_cast<size_t>(DIAS_SEMANA); ++d) e.asistencia[i][d] = fa->second[d];
     }
-    reconstruir_adyacencia(e);   // los prerrequisitos del plan se acomodan a los cursos cargados
+    reconstruir_adyacencia(e);   
 
-    // Módulos extra: si su archivo falta o no sirve, se conservan los de ejemplo, pero filtrados
-    // a los estudiantes y cursos que se acaban de cargar (para no apuntar a datos que no existen).
     json j_extra;
     if (leer_archivo(dir + "/asignaciones_estudiantes.json", j_extra) != Lectura::OK || !inscripciones_desde_json(j_extra, e))
         inscripciones_desde_json(inscripciones_a_json(e), e);

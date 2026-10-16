@@ -1,5 +1,3 @@
-// DUEÑO: P1 · main.cpp SOLO crea el servidor y registra las rutas de cada módulo
-// (así nadie edita el mismo archivo y se evitan conflictos de Git).
 #include <cstdlib>
 #include <exception>
 #include <iostream>
@@ -13,7 +11,7 @@
 #include "arbol.hpp"
 #include "asistencia.hpp"
 #include "avisos.hpp"
-#include "docentes.hpp"          // módulo de Cristian
+#include "docentes.hpp"
 #include "estado.hpp"
 #include "estudiantes.hpp"
 #include "grafo.hpp"
@@ -29,16 +27,14 @@
 int main() {
     Estado& estado = estado_global();
     inicializar_matrices(estado);
-    cargar_datos_ejemplo(estado);      // arranca con los datos de ejemplo...
+    cargar_datos_ejemplo(estado);
     cargar_ejemplo_inscripciones(estado);
     cargar_ejemplo_horario(estado);
     cargar_ejemplo_avisos(estado);
-    inicializarDocentesYCursos();      // (docentes de ejemplo del módulo de Cristian)
-    cargar_todo(estado);               // ...y si data/ tiene datos válidos, esos los reemplazan
+    inicializarDocentesYCursos();      
+    cargar_todo(estado);             
 
     httplib::Server svr;
-
-    // CORS permisivo (útil si el frontend se abre desde otro origen).
     svr.set_default_headers({
         {"Access-Control-Allow-Origin", "*"},
         {"Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS"},
@@ -48,7 +44,6 @@ int main() {
         res.status = 204;
     });
 
-    // Cualquier error inesperado en un handler se responde con el formato estándar.
     svr.set_exception_handler([](const httplib::Request&, httplib::Response& res, std::exception_ptr ep) {
         std::string detalle = "Error interno del servidor.";
         try {
@@ -60,7 +55,6 @@ int main() {
         responder_error(res, detalle, 500);
     });
 
-    // El backend también sirve el frontend (ejecutar desde la raíz del repo).
     svr.set_mount_point("/", "./frontend");
 
     svr.Get("/api/salud", [](const httplib::Request&, httplib::Response& res) {
@@ -75,17 +69,15 @@ int main() {
     registrar_rutas_asistencia(svr, estado);
     registrar_rutas_reportes(svr, estado);
     registrar_rutas_grafo(svr, estado);
-    registrar_rutas_arbol(svr, estado);        // de muestra (solo lectura)
-    registrar_rutas_algebra(svr, estado);      // de muestra (solo lectura)
-    registrar_rutas_memoria(svr, estado);      // matrices crudas en RAM (solo lectura)
+    registrar_rutas_arbol(svr, estado);        
+    registrar_rutas_algebra(svr, estado);      
+    registrar_rutas_memoria(svr, estado);      
     registrar_rutas_inscripciones(svr, estado);
     registrar_rutas_horario(svr, estado);
     registrar_rutas_avisos(svr, estado);
     registrar_rutas_catalogo(svr, estado);
     registrar_rutas_persistencia(svr, estado);
 
-    // Guardado automático: después de cada cambio que salió bien (POST/PUT/DELETE con código < 400)
-    // se escriben los archivos de data/, así nada se pierde al cerrar el servidor.
     svr.set_post_routing_handler([&estado](const httplib::Request& req, httplib::Response& res) {
         const bool cambia_datos = req.method == "POST" || req.method == "PUT" || req.method == "DELETE";
         const bool es_api = req.path.rfind("/api/", 0) == 0 && req.path != "/api/guardar" && req.path != "/api/cargar";
@@ -103,7 +95,6 @@ int main() {
         }
     }
 
-    // Por defecto solo responde en esta PC. Con HOST=0.0.0.0 acepta conexiones de la red.
     const char* host_env = std::getenv("HOST");
     const std::string host = (host_env != nullptr && !std::string(host_env).empty()) ? host_env : "127.0.0.1";
 
@@ -111,7 +102,6 @@ int main() {
         std::cerr << "No se pudo abrir " << host << ":" << puerto << " (ya hay otro servidor corriendo?)" << std::endl;
         return 1;
     }
-    // 127.0.0.1 y no localhost: en Windows localhost intenta primero IPv6 (::1) y cada conexion tarda ~2 s.
     std::cout << "Servidor listo en http://127.0.0.1:" << puerto << std::endl;
     if (host != "127.0.0.1") std::cout << "Escuchando en " << host << ":" << puerto << " (accesible desde la red)" << std::endl;
     svr.listen_after_bind();

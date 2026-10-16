@@ -1,4 +1,3 @@
-// Módulo Memoria. Formato definido por vista-memoria.js.
 #include "memoria.hpp"
 
 #include <algorithm>
@@ -11,7 +10,6 @@ void registrar_rutas_memoria(httplib::Server& svr, Estado& estado) {
         std::lock_guard<std::mutex> candado(estado.mtx);
         const size_t n = std::min(estado.estudiantes.size(), static_cast<size_t>(MAX_ESTUDIANTES));
         const size_t m = std::min(estado.cursos.size(), static_cast<size_t>(MAX_CURSOS));
-        // Se incluye una fila más: la que ocupará el próximo estudiante (aún en su valor inicial).
         const size_t filas = std::min(n + 1, static_cast<size_t>(MAX_ESTUDIANTES));
 
         json estudiantes = json::array();
@@ -28,7 +26,7 @@ void registrar_rutas_memoria(httplib::Server& svr, Estado& estado) {
         for (size_t i = 0; i < filas; ++i) {
             json fila_notas = json::array();
             for (size_t j = 0; j < m; ++j) {
-                fila_notas.push_back(estado.notas[i][j]);   // valor crudo: -1 = SIN_NOTA
+                fila_notas.push_back(estado.notas[i][j]);
                 if (i < n && estado.notas[i][j] >= 0.0f) ++notas_registradas;
             }
             notas.push_back(fila_notas);
