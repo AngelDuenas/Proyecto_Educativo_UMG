@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Inscripciones | CLARD Academy</title>
+  <link rel="icon" type="image/png" href="../img/icono.png">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.18"></script>
+  <script src="../js/tema.js"></script>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body data-pagina="inscripciones" data-raiz="../">
+  <div class="min-h-screen md:grid md:grid-cols-[248px_1fr]">
+    <aside class="menu" id="menu"></aside>
+
+    <main class="contenido min-w-0 px-4 pt-8 pb-12 md:px-10">
+      <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1>Inscripciones</h1>
+          <p class="mt-1.5 max-w-[62ch] text-tinta-suave">Inscribe a cada estudiante en los cursos que puede llevar. El C++ revisa el <b>grafo de prerrequisitos</b> y la <b>matriz de notas</b>: solo deja inscribir si ya aprobó los cursos anteriores.</p>
+        </div>
+        <div class="campo w-full sm:w-auto sm:min-w-64">
+          <label for="estudiante">Estudiante</label>
+          <select id="estudiante"></select>
+        </div>
+      </header>
+
+      <section class="mb-5 grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4" id="cifras" aria-label="Resumen del estudiante"></section>
+
+      <section class="panel" aria-labelledby="titulo-cursos">
+        <div class="panel-encabezado">
+          <div>
+            <h2 id="titulo-cursos">Cursos del plan</h2>
+            <p>Cada curso muestra si ya lo aprobó, si está inscrito, si puede inscribirse o qué le falta.</p>
+          </div>
+          <div class="leyenda">
+            <span><i class="bg-celeste-100"></i>Aprobado</span>
+            <span><i class="bg-marino"></i>Inscrito</span>
+            <span><i class="bg-amarillo"></i>Disponible</span>
+            <span><i class="bg-naranja-700"></i>Bloqueado</span>
+          </div>
+        </div>
+        <div id="tabla-cursos"><div class="cargando">Cargando cursos…</div></div>
+      </section>
+
+      <section class="panel mt-5" aria-labelledby="titulo-todas">
+        <div class="panel-encabezado">
+          <h2 id="titulo-todas">Todas las inscripciones</h2>
+          <span class="text-sm text-tinta-suave" id="contador-todas"></span>
+        </div>
+        <div id="tabla-todas"><div class="cargando">Cargando inscripciones…</div></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="vista-inscripciones.js"></script>
+</body>
+</html>

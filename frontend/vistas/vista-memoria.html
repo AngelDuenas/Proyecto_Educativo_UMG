@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Matrices en memoria | CLARD Academy</title>
+  <link rel="icon" type="image/png" href="../img/icono.png">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.18"></script>
+  <script src="../js/tema.js"></script>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body data-pagina="memoria" data-raiz="../">
+  <div class="min-h-screen md:grid md:grid-cols-[248px_1fr]">
+    <aside class="menu" id="menu"></aside>
+
+    <main class="contenido min-w-0 px-4 pt-8 pb-12 md:px-10">
+      <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1>Matrices en memoria</h1>
+          <p class="mt-1.5 max-w-[70ch] text-tinta-suave">Así están guardados los datos <b>dentro del servidor C++</b>, en sus arreglos de tamaño fijo. Los valores son los crudos (por ejemplo, <code>-1</code> = sin nota). La pantalla se actualiza sola cada 2 segundos: abre <b>Calificaciones</b> o <b>Asistencia</b> en otra pestaña, haz un cambio y mira cómo se ilumina la celda que cambió.</p>
+        </div>
+        <label class="flex items-center gap-2 whitespace-nowrap text-sm font-bold text-marino">
+          <input type="checkbox" id="auto" checked> Actualizar automáticamente
+        </label>
+      </header>
+
+      <section class="mb-5 grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4" id="cifras" aria-label="Ocupación de las matrices"></section>
+
+      <div id="contenido-memoria"><div class="cargando">Leyendo la memoria del servidor…</div></div>
+    </main>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="vista-memoria.js"></script>
+</body>
+</html>

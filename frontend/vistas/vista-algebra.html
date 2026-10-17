@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Álgebra lineal | CLARD Academy</title>
+  <link rel="icon" type="image/png" href="../img/icono.png">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.18"></script>
+  <script src="../js/tema.js"></script>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body data-pagina="algebra" data-raiz="../">
+  <div class="min-h-screen md:grid md:grid-cols-[248px_1fr]">
+    <aside class="menu" id="menu"></aside>
+
+    <main class="contenido min-w-0 px-4 pt-8 pb-12 md:px-10">
+      <header class="mb-6">
+        <h1>Álgebra lineal aplicada</h1>
+        <p class="mt-1.5 max-w-[70ch] text-tinta-suave">Vista de muestra: cómo usamos los temas del curso de <b>Álgebra Lineal</b> dentro del sistema. Todo se calcula en el C++ con los datos reales (notas, créditos, asistencia y prerrequisitos); aquí solo se muestra el resultado de cada operación.</p>
+      </header>
+
+      <nav class="indice-algebra mb-6" aria-label="Operaciones">
+        <a href="#sec-matriz">1. Matriz de notas</a>
+        <a href="#sec-transpuesta">2. Transpuesta</a>
+        <a href="#sec-producto">3. Matriz × vector</a>
+        <a href="#sec-cursos">4. Promedio por curso</a>
+        <a href="#sec-combinacion">5. Combinación lineal</a>
+        <a href="#sec-adyacencia">6. Potencia de una matriz</a>
+      </nav>
+
+      <div id="contenido-algebra"><div class="cargando">Calculando…</div></div>
+    </main>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="vista-algebra.js"></script>
+</body>
+</html>

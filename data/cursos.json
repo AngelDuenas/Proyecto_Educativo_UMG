@@ -1,0 +1,62 @@
+[
+  {
+    "codigo": "MAT101",
+    "creditos": 5,
+    "nombre": "Matemática I",
+    "semestre": 1
+  },
+  {
+    "codigo": "PRG101",
+    "creditos": 5,
+    "nombre": "Introducción a la Programación",
+    "semestre": 1
+  },
+  {
+    "codigo": "LOG101",
+    "creditos": 4,
+    "nombre": "Lógica de Sistemas",
+    "semestre": 1
+  },
+  {
+    "codigo": "MAT102",
+    "creditos": 5,
+    "nombre": "Matemática II",
+    "semestre": 2
+  },
+  {
+    "codigo": "PRG102",
+    "creditos": 5,
+    "nombre": "Programación I",
+    "semestre": 2
+  },
+  {
+    "codigo": "FIS101",
+    "creditos": 4,
+    "nombre": "Física I",
+    "semestre": 2
+  },
+  {
+    "codigo": "ALG201",
+    "creditos": 5,
+    "nombre": "Álgebra Lineal",
+    "semestre": 3
+  },
+  {
+    "codigo": "MDS201",
+    "creditos": 5,
+    "nombre": "Matemática Discreta",
+    "semestre": 3
+  },
+  {
+    "codigo": "PRG201",
+    "creditos": 5,
+    "nombre": "Programación II",
+    "semestre": 3
+  },
+  {
+    "codigo": "EDD301",
+    "creditos": 5,
+    "nombre": "Estructura de Datos",
+    "semestre": 4
+  }
+]

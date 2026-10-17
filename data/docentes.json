@@ -1,0 +1,22 @@
+[
+  {
+    "especialidad": "Matemática",
+    "id": "D01",
+    "nombre": "Roberto Méndez"
+  },
+  {
+    "especialidad": "Programación",
+    "id": "D02",
+    "nombre": "Karla Pérez"
+  },
+  {
+    "especialidad": "Bases de Datos",
+    "id": "D03",
+    "nombre": "Julio Castillo"
+  },
+  {
+    "especialidad": "Politica",
+    "id": "D04",
+    "nombre": "Carlos Pineda"
+  }
+]

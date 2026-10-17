@@ -1,0 +1,150 @@
+/* =====================================================================
+   estilos.css · Lo poco que Tailwind no cubre bien
+   ---------------------------------------------------------------------
+   Colores, botones, tablas, etc. están en js/tema.js (Tailwind).
+   Aquí solo: fuentes, fondo, dibujos SVG del árbol y el grafo,
+   detalles del navegador e impresión. Usa los colores del tema
+   con var(--color-nombre).
+   ===================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Lexend:wght@400;500;700&display=swap");
+
+/* Fondo: manchas suaves inspiradas en el logo de CLARD Academy */
+.contenido {
+  background:
+    radial-gradient(ellipse 520px 380px at 100% 0%, rgb(142 223 252 / 0.28), transparent 70%),
+    radial-gradient(ellipse 420px 320px at 0% 100%, rgb(142 223 252 / 0.16), transparent 70%),
+    var(--color-papel);
+  background-attachment: fixed;
+}
+
+/* ---------- Árbol y grafo (SVG) ---------- */
+.lienzo svg { display: block; margin: 0 auto; }
+
+.arista { fill: none; stroke: var(--color-borde-fuerte); stroke-width: 1.5; }
+.arista.recorrida { stroke: var(--color-amarillo); stroke-width: 3.5; }
+
+.nodo rect,
+.nodo circle {
+  fill: #fff;
+  stroke: var(--color-marino);
+  stroke-width: 2;
+  transition: fill 0.25s, stroke 0.25s;
+}
+
+.nodo text { font-family: var(--font-texto); font-size: 13px; fill: var(--color-tinta); pointer-events: none; }
+.nodo .nodo-tipo { font-size: 11px; fill: var(--color-tinta-suave); }
+
+/* Un color por nivel del árbol, de oscuro a claro */
+.nodo.nivel-0 rect { fill: var(--color-marino); stroke: var(--color-marino); }
+.nodo.nivel-1 rect { fill: var(--color-azul-700); stroke: var(--color-azul-700); }
+.nodo.nivel-2 rect { fill: var(--color-celeste); stroke: var(--color-celeste); }
+.nodo.nivel-3 rect { fill: var(--color-celeste-50); stroke: var(--color-celeste); }
+.nodo.nivel-0 text,
+.nodo.nivel-1 text { fill: #fff; }
+.nodo.nivel-2 text { fill: var(--color-marino); }
+.nodo.nivel-0 .nodo-tipo,
+.nodo.nivel-1 .nodo-tipo { fill: var(--color-celeste); }
+
+/* Recorridos: visitado en naranja (triángulo del logo), origen en azul marino */
+.nodo.visitado rect,
+.nodo.visitado circle { fill: var(--color-amarillo); stroke: var(--color-amarillo); }
+.nodo.origen circle { fill: var(--color-marino); stroke: var(--color-marino); }
+.nodo.visitado text:not(.nodo-nombre) { fill: var(--color-marino); }
+.nodo.origen text:not(.nodo-nombre) { fill: #fff; }
+
+/* En el grafo el nombre va debajo del círculo, sobre fondo blanco */
+.nodo .nodo-nombre { font-size: 11px; fill: var(--color-tinta-suave); }
+
+.nodo-orden circle { fill: var(--color-amarillo); stroke: #fff; stroke-width: 2; }
+.nodo-orden text { fill: var(--color-marino); font-size: 11px; font-weight: 700; }
+
+/* ---------- Detalles del navegador ---------- */
+
+/* Combobox: flecha propia en azul marino en lugar de la del navegador */
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%23033857' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.85rem center;
+  background-size: 1.1rem;
+}
+select:focus { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none' stroke='%2312ade0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12l4-4 4 4'/%3E%3C/svg%3E"); }
+select::-ms-expand { display: none; }
+
+option { color: var(--color-tinta); background: #fff; }
+
+.input-nota { appearance: textfield; -moz-appearance: textfield; }
+.input-nota::-webkit-outer-spin-button,
+.input-nota::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+dialog::backdrop { background: rgb(2 42 66 / 0.5); backdrop-filter: blur(3px); }
+
+/* Entrada suave de las ventanas emergentes */
+dialog[open] { animation: aparecer 0.2s ease-out; }
+@keyframes aparecer { from { opacity: 0; translate: 0 12px; scale: 0.98; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+/* ---------- Tablas como tarjetas en celular (app.js pone data-label) ---------- */
+@media (max-width: 639px) {
+  .tabla-movil thead { display: none; }
+  .tabla-movil, .tabla-movil tbody, .tabla-movil tr, .tabla-movil td { display: block; width: 100%; }
+  .tabla-movil tbody tr { padding: 0.85rem 1rem; border-bottom: 1px solid var(--color-borde); }
+  .tabla-movil tbody tr:last-child { border-bottom: 0; }
+  .tabla-movil td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.3rem 0;
+    border: 0;
+    text-align: right;
+    white-space: normal;
+  }
+  .tabla-movil td::before {
+    content: attr(data-label);
+    flex: none;
+    max-width: 45%;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-tinta-suave);
+  }
+  .tabla-movil td[data-label=""]::before { display: none; }
+  /* La primera columna (nombre, curso…) es el título de la tarjeta */
+  .tabla-movil td:first-child { display: block; padding-top: 0; text-align: left; font-weight: 700; color: var(--color-marino); }
+  .tabla-movil td:first-child::before { display: none; }
+  .tabla-movil td:first-child .sub { font-weight: 400; }
+  .tabla-movil td.acciones-fila { justify-content: flex-end; padding-top: 0.6rem; }
+  /* Celda con texto + subtítulo (nombre y carnet, curso y nombre): etiqueta arriba y valor abajo */
+  .tabla-movil td:has(.sub):not(:first-child) { display: block; text-align: left; }
+  .tabla-movil td:has(.sub):not(:first-child)::before { display: block; max-width: none; margin-bottom: 0.15rem; }
+  /* Rankings: el puesto es una insignia y el estudiante el título */
+  .tabla-ranking td:first-child {
+    display: inline-grid; place-items: center; width: auto; min-width: 2rem; height: 2rem;
+    margin-bottom: 0.35rem; padding: 0 0.5rem; border-radius: 999px;
+    background: var(--color-marino); color: #fff; font-size: 0.85rem;
+  }
+  .tabla-ranking td:nth-child(2) { display: block; text-align: left; font-weight: 700; color: var(--color-marino); }
+  .tabla-ranking td:nth-child(2)::before { display: none !important; }
+  .tabla-movil td.acciones-fila:empty { display: none; }
+  .tabla-movil .barra { min-width: 0; flex: 1; max-width: 60%; }
+}
+
+/* ---------- Matrices en memoria: celda que acaba de cambiar ---------- */
+@keyframes destello {
+  from { background-color: var(--color-amarillo); color: var(--color-marino); box-shadow: inset 0 0 0 2px var(--color-naranja); }
+}
+.matriz td.cambio { animation: destello 2.5s ease-out; font-weight: 700; }
+@media (prefers-reduced-motion: reduce) { .matriz td.cambio { animation: none; outline: 2px solid var(--color-naranja); } }
+
+/* ---------- Impresión (botón "Imprimir reporte") ---------- */
+@media print {
+  .menu, .toasts, header .btn, select { display: none !important; }
+  .contenido { background: none; padding: 0; }
+  .panel { box-shadow: none; break-inside: avoid; }
+}

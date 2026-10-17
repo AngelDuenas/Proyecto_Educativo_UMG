@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Avisos y calendario | CLARD Academy</title>
+  <link rel="icon" type="image/png" href="../img/icono.png">
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.1.18"></script>
+  <script src="../js/tema.js"></script>
+  <link rel="stylesheet" href="../css/estilos.css">
+</head>
+<body data-pagina="avisos" data-raiz="../">
+  <div class="min-h-screen md:grid md:grid-cols-[248px_1fr]">
+    <aside class="menu" id="menu"></aside>
+
+    <main class="contenido min-w-0 px-4 pt-8 pb-12 md:px-10">
+      <header class="mb-6 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h1>Avisos y calendario</h1>
+          <p class="mt-1.5 max-w-[62ch] text-tinta-suave">Exámenes, entregas, eventos y avisos generales del semestre, ordenados por fecha.</p>
+        </div>
+        <button class="btn btn-primario" type="button" id="btn-nuevo">Nuevo aviso</button>
+      </header>
+
+      <section class="mb-5 grid grid-cols-[repeat(auto-fit,minmax(150px,1fr))] gap-4" id="cifras" aria-label="Resumen de avisos"></section>
+
+      <section class="panel" aria-labelledby="titulo-proximos">
+        <div class="panel-encabezado">
+          <h2 id="titulo-proximos">Próximas fechas</h2>
+          <div class="flex flex-wrap items-center gap-2">
+            <label class="sr-only" for="filtro-tipo">Filtrar por tipo</label>
+            <select class="w-auto" id="filtro-tipo">
+              <option value="">Todos los tipos</option>
+              <option value="examen">Exámenes</option>
+              <option value="entrega">Entregas</option>
+              <option value="evento">Eventos</option>
+              <option value="aviso">Avisos</option>
+            </select>
+          </div>
+        </div>
+        <div id="lista-proximos"><div class="cargando">Cargando avisos…</div></div>
+      </section>
+
+      <details class="panel mt-5" id="pasados">
+        <summary class="cursor-pointer font-titulo text-lg font-bold text-marino">Fechas que ya pasaron <span class="text-sm font-normal text-tinta-suave" id="contador-pasados"></span></summary>
+        <div class="mt-4" id="lista-pasados"></div>
+      </details>
+
+      <dialog class="modal" id="modal-aviso" aria-labelledby="titulo-modal-aviso">
+        <div class="modal-encabezado">
+          <h2 id="titulo-modal-aviso">Nuevo aviso</h2>
+          <button class="modal-cerrar" type="button" data-cerrar aria-label="Cerrar"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"/></svg></button>
+        </div>
+        <form class="modal-cuerpo" id="form-aviso" novalidate>
+          <div class="campo">
+            <label for="av-titulo">Título</label>
+            <input id="av-titulo" name="titulo" required maxlength="120" placeholder="Primer parcial de Matemática I" autofocus>
+          </div>
+          <div class="grid gap-3 sm:grid-cols-2">
+            <div class="campo">
+              <label for="av-fecha">Fecha</label>
+              <input id="av-fecha" name="fecha" type="date" required>
+            </div>
+            <div class="campo">
+              <label for="av-tipo">Tipo</label>
+              <select id="av-tipo" name="tipo" required>
+                <option value="examen">Examen</option>
+                <option value="entrega">Entrega</option>
+                <option value="evento">Evento</option>
+                <option value="aviso">Aviso general</option>
+              </select>
+            </div>
+          </div>
+          <div class="campo">
+            <label for="av-curso">Curso relacionado</label>
+            <select id="av-curso" name="curso"></select>
+            <small>Opcional. Déjalo en «General» si aplica a todos.</small>
+          </div>
+          <div class="campo">
+            <label for="av-descripcion">Descripción</label>
+            <textarea id="av-descripcion" name="descripcion" rows="3" placeholder="Temas, lugar, qué llevar…"></textarea>
+          </div>
+          <div class="modal-botones">
+            <button class="btn btn-secundario" type="button" data-cerrar>Cancelar</button>
+            <button class="btn btn-primario" type="submit" id="btn-guardar">Guardar aviso</button>
+          </div>
+        </form>
+      </dialog>
+    </main>
+  </div>
+
+  <script src="../js/api.js"></script>
+  <script src="../js/app.js"></script>
+  <script src="vista-avisos.js"></script>
+</body>
+</html>
