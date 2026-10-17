@@ -18,5 +18,10 @@
     "especialidad": "Politica",
     "id": "D04",
     "nombre": "Carlos Pineda"
+  },
+  {
+    "especialidad": "Contabilidad",
+    "id": "D06",
+    "nombre": "Lic. Pedro Chavez"
   }
 ]

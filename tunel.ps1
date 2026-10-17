@@ -54,6 +54,8 @@ Write-Host ""
 Write-Host "Abriendo el túnel (Ctrl+C para cerrarlo)..." -ForegroundColor Cyan
 Write-Host "Recuerda: cualquiera con el enlace puede modificar los datos. Compártelo solo con quien deba verlo." -ForegroundColor Yellow
 try {
+    # cloudflared escribe todo su registro por stderr; con "Stop", PowerShell 5.1 lo trataría como error fatal.
+    $ErrorActionPreference = "Continue"
     # cloudflared escribe el enlace en su registro; se resalta cuando aparece.
     & $cloudflared tunnel --no-autoupdate --url "http://127.0.0.1:$Puerto" 2>&1 | ForEach-Object {
         $linea = "$_"

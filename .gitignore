@@ -5,12 +5,29 @@ build/
 *.exe
 *.pdb
 *.ilk
+*.idb
+*.exp
+*.lib
+
+# CMake (Visual Studio usa out/ por defecto)
+out/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CMakeUserPresets.json
+CMakeSettings.json
 
 claude.md
 
 # Editores / sistema
+.vs/
 .vscode/
 .idea/
+*.slnx
+*.sln
+*.vcxproj*
+*.suo
+*.user
 .DS_Store
 Thumbs.db
 

@@ -58,5 +58,11 @@
     "carrera": "Ingeniería en Sistemas",
     "nombre": "Ana",
     "semestre": 1
+  },
+  {
+    "carnet": "0800-26-71837",
+    "carrera": "Ingeniería en Sistemas",
+    "nombre": "José Perez",
+    "semestre": 2
   }
 ]

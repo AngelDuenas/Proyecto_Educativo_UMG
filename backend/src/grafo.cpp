@@ -37,6 +37,8 @@ std::vector<int> buscar_ruta(const Estado& e, int desde, int hasta) {
     return ruta;
 }
 
+}  // namespace
+
 void registrar_rutas_grafo(httplib::Server& svr, Estado& estado) {
     svr.Get("/api/grafo", [&estado](const httplib::Request&, httplib::Response& res) {
         std::lock_guard<std::mutex> candado(estado.mtx);
